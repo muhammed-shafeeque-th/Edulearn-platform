@@ -22,3 +22,6 @@
 [submodule "src/order-service"]
 	path = src/order-service
 	url = https://github.com/muhammed-shafeeque-th/EduLearn-order-srv.git
+[submodule "src/frontend"]
+	path = src/frontend
+	url = https://github.com/muhammed-shafeeque-th/EduLearn-client.git
