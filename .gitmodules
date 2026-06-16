@@ -1,0 +1,24 @@
+[submodule "src/auth-service"]
+	path = src/auth-service
+	url = https://github.com/muhammed-shafeeque-th/EduLearn-auth-srv.git
+[submodule "src/user-service"]
+	path = src/user-service
+	url = https://github.com/muhammed-shafeeque-th/EduLearn-user-srv.git
+[submodule "src/course-service"]
+	path = src/course-service
+	url = https://github.com/muhammed-shafeeque-th/EduLearn-course-srv.git
+[submodule "src/chat-service"]
+	path = src/chat-service
+	url = https://github.com/muhammed-shafeeque-th/EduLearn-chat-srv.git
+[submodule "src/payment-service"]
+	path = src/payment-service
+	url = https://github.com/muhammed-shafeeque-th/EduLearn-payment-srv.git
+[submodule "src/notification-service"]
+	path = src/notification-service
+	url = https://github.com/muhammed-shafeeque-th/EduLearn-notification-srv.git
+[submodule "src/api-gateway"]
+	path = src/api-gateway
+	url = https://github.com/muhammed-shafeeque-th/EduLearn-api-gateway.git
+[submodule "src/order-service"]
+	path = src/order-service
+	url = https://github.com/muhammed-shafeeque-th/EduLearn-order-srv.git
