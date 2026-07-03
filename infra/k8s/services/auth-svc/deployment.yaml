@@ -1,0 +1,278 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  namespace: edulearn
+  labels:
+    app: auth-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      # serviceAccountName: edulearn-sa 
+      containers:
+        - name: auth-service
+          image: edulearn-auth:latest
+          ports:
+            - containerPort: 50051
+          env:
+            - name: NODE_ENV
+              value: "development"
+            - name: SERVICE_NAME
+              value: "auth-service"
+            - name: SERVICE_VERSION
+              value: "0.0.1"
+            - name: API_PORT
+              value: '3002'
+            - name: GRPC_PORT
+              value: '50051'
+            # Services url
+            - name: COURSE_SERVICE_GRPC
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: COURSE_SERVICE_GRPC
+            - name: USER_SERVICE_GRPC
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: USER_SERVICE_GRPC
+            # DB configs
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: auth-secrets
+                  key: DATABASE_URL
+            - name: POSTGRES_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-config
+                  key: POSTGRES_PORT
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-config
+                  key: POSTGRES_DB
+            - name: POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-config
+                  key: POSTGRES_HOST
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-config
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: auth-secrets
+                  key: POSTGRES_PASSWORD
+            # REDIS configs
+            - name: REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: REDIS_URL
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: REDIS_HOST
+            - name: REDIS_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-config
+                  key: REDIS_DB
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: REDIS_PORT
+
+            # Kafka configs
+            - name: KAFKA_BROKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: KAFKA_BROKERS
+            - name: KAFKA_CLIENT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-config
+                  key: KAFKA_CLIENT_ID
+            - name: KAFKA_CONSUMER_GROUP
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-config
+                  key: KAFKA_CONSUMER_GROUP
+            # Template config
+            - name: TEMPLATE_BASE_DIR
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-config
+                  key: TEMPLATE_BASE_DIR
+            - name: COMPANY_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-config
+                  key: COMPANY_NAME
+            - name: COMPANY_ADDRESS
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-config
+                  key: COMPANY_ADDRESS
+            - name: SUPPORT_EMAIL
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-config
+                  key: SUPPORT_EMAIL
+            - name: BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-config
+                  key: BASE_URL
+            - name: TWITTER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-config
+                  key: TWITTER_URL
+            - name: FACEBOOK_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-config
+                  key: FACEBOOK_URL
+            - name: LINKEDIN_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-config
+                  key: LINKEDIN_URL
+            - name: YOUTUBE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-config
+                  key: YOUTUBE_URL
+
+            # JWT configs
+            - name: JWT_ACCESS_TOKEN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: edulearn-secrets
+                  key: JWT_ACCESS_TOKEN_SECRET
+            - name: JWT_REFRESH_TOKEN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: edulearn-secrets
+                  key: JWT_REFRESH_TOKEN_SECRET
+            - name: JWT_ACCESS_TOKEN_EXPIRY
+              valueFrom:
+                secretKeyRef:
+                  name: edulearn-secrets
+                  key: JWT_ACCESS_TOKEN_EXPIRY
+            - name: JWT_REFRESH_TOKEN_EXPIRY
+              valueFrom:
+                secretKeyRef:
+                  name: edulearn-secrets
+                  key: JWT_REFRESH_TOKEN_EXPIRY
+            - name: JWT_REFRESH_TOKEN_SHORT_EXPIRY
+              valueFrom:
+                secretKeyRef:
+                  name: edulearn-secrets
+                  key: JWT_REFRESH_TOKEN_SHORT_EXPIRY
+            - name: JWT_REFRESH_TOKEN_LONG_EXPIRY
+              valueFrom:
+                secretKeyRef:
+                  name: edulearn-secrets
+                  key: JWT_REFRESH_TOKEN_LONG_EXPIRY
+            - name: JWT_TOKEN_AUDIENCE
+              valueFrom:
+                secretKeyRef:
+                  name: edulearn-secrets
+                  key: JWT_TOKEN_AUDIENCE
+            - name: JWT_TOKEN_ISSUER
+              valueFrom:
+                secretKeyRef:
+                  name: edulearn-secrets
+                  key: JWT_TOKEN_ISSUER
+            - name: AUTH_ADMIN_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: edulearn-secrets
+                  key: AUTH_ADMIN_EMAIL
+            - name: AUTH_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: edulearn-secrets
+                  key: AUTH_ADMIN_PASSWORD
+            - name: AUTH_USER_ID
+              valueFrom:
+                secretKeyRef:
+                  name: edulearn-secrets
+                  key: AUTH_USER_ID
+
+            # Observability config
+            #Jaeger
+            - name: JAEGER_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_ENDPOINT
+            - name: JAEGER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_PORT
+            - name: JAEGER_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_HOST
+            - name: JAEGER_SAMPLING_RATE
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_SAMPLING_RATE
+            # Prometheus
+            - name: PROMETHEUS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: PROMETHEUS_PORT
+            # Logger
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-config
+                  key: LOG_LEVEL
+            - name: LOKI_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: LOKI_URL
+        
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+          # livenessProbe:
+          #   httpGet:
+          #     path: "/health"
+          #     port: 3000
+          #   initialDelaySeconds: 15
+          #   periodSeconds: 10
+          # readinessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 3000
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 5
+
