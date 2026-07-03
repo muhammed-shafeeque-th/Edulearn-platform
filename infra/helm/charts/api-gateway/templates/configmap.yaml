@@ -1,0 +1,3 @@
+{{- if .Values.configData }}
+{{- include "edulearn-common.configmap" . }}
+{{- end }}
