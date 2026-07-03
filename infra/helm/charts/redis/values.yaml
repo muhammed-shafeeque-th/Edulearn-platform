@@ -1,0 +1,14 @@
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: true
+    password: "redis-password-change-in-prod"   # Use External Secrets in real prod
+  master:
+    persistence:
+      enabled: true
+      size: 10Gi
+  replica:
+    persistence:
+      enabled: true
+      size: 10Gi
