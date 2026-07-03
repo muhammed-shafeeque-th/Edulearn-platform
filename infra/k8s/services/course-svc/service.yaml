@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: course-svc
+  namespace: edulearn
+  labels:
+    app: course-service
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "3001"
+    prometheus.io/path: "/health/metrics"
+spec:
+  selector:
+    app: course-service
+  ports:
+    - name: http
+      port: 3003
+      targetPort: 3003
+    - name: grpc
+      port: 50053
+      targetPort: 50053
+  type: ClusterIP
