@@ -1,0 +1,164 @@
+nameOverride: notification
+
+replicaCount: 2
+
+image:
+  repository: ghcr.io/muhammed-shafeeque-th/edulearn/notification
+  pullPolicy: IfNotPresent
+  tag: "v1.0.4"
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 50056
+  ports:
+    - name: health-port
+      port: 3006
+      targetPort: 3006
+    - name: grpc
+      port: 50056
+      targetPort: 50056
+    - name: websocket
+      port: 4001
+      targetPort: 4001
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: api.edulearn.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8086 # http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8086 # http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+
+env:
+  NODE_ENV: "development"
+  SERVICE_NAME: notification-service
+  serviceVersion: "0.0.1"
+  API_PORT: 3006
+  GRPC_PORT: 50056
+  WS_PORT: 4001
+
+configMaps:
+  - edulearn-config
+  - notification-config
+
+secretRefs:
+  - edulearn-secrets
+  - notification-secrets
+
+configData:
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: notification_service
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: password
+  POSTGRES_SSL_MODE: disable
+  DB_MAX_OPEN_CONNS: "25"
+  DB_MAX_IDLE_CONNS: "5"
+  DB_CONN_MAX_LIFETIME: 5m
+  DB_CONN_MAX_IDLE_TIME: 5m
+
+  TEMPLATE_BASE_PATH: pkg/templates
+
+  # KAFKA CONFIGURATION
+  KAFKA_CONSUMER_GROUP: notification-service-group
+  KAFKA_WORKERS: "6"
+  KAFKA_RETRIES: "3"
+
+  # SMTP CONFIGURATION
+  SMTP_PORT: "587"
+  SMTP_TLS_ENABLED: "true"
+  SMTP_TLS_SKIP_VERIFY: "false"
+  SMTP_RATE_LIMIT_RPM: "60"
+  SMTP_RATE_LIMIT_BURST: "1"
+
+  # WEBSOCKET CONFIGURATION
+  WS_PORT: "4001"
+
+  # gRPC CONFIGURATION
+  GRPC_PORT: "50056"
+  GRPC_MAX_CONCURRENT_STREAMS: "100"
+  GRPC_MAX_CONNECTION_IDLE: 15s
+  GRPC_MAX_CONNECTION_AGE: 30s
+  GRPC_MAX_CONNECTION_AGE_GRACE: 5s
+  GRPC_TIME: 2h
+  GRPC_TIMEOUT: 20s
+
+  # OpenTelemetry Jaeger Tracing
+  JAEGER_SAMPLING_RATE: "0.1"
+  JAEGER_SAMPLING_TYPE: probabilistic
+
+  # Prometheus Metrics
+  PROMETHEUS_PORT: "9091"
+  PROMETHEUS_PATH: /metrics
+  METRICS_ENABLED: "true"
+
+
+  # Logging Configuration
+  LOG_LEVEL: debug
+  LOG_FORMAT: json
+  LOG_FILE: logs/notification-service.log
+  LOG_OUTPUT: stdout
+  LOG_MAX_SIZE: 100m
+  LOG_MAX_FILES: "5"
+  LOG_COMPRESS: "true"
+
+  # Tracing Configuration
+  TRACING_ENABLED: "true"
+  TRACING_SAMPLING_RATE: "0.1"
+  TRACING_SERVICE_NAME: notification-service
+
+  #OTP_TEMPLATE_PATH=app\internal\shared\template\activation-mail.html
+
+  # HEALTH CHECK CONFIGURATION
+  HEALTH_PORT: "8086"
+  HEALTH_PATH: /health
+  READINESS_PORT: "8086"
+  READINESS_PATH: /ready
+  LIVENESS_PORT: "8086"
+  LIVENESS_PATH: /live
+
+
+
+secretData: {}
+
+configMounts: []

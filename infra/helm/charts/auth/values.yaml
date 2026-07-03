@@ -1,0 +1,137 @@
+nameOverride: auth
+
+replicaCount: 2
+
+image:
+  repository: ghcr.io/muhammed-shafeeque-th/edulearn/auth
+  pullPolicy: IfNotPresent
+  tag: "v1.0.4"
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 50051
+  ports:
+    - name: http
+      port: 3001
+      targetPort: 3001
+    - name: grpc
+      port: 50051
+      targetPort: 50051
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: api.edulearn.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8086 # http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8086 # http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+
+env:
+  NODE_ENV:  "development"
+  SERVICE_NAME: auth-service
+  serviceVersion:  "0.0.1"
+  API_PORT:  3002
+  GRPC_PORT:  50051
+
+configMaps:
+  - edulearn-config
+  - auth-config
+
+secretRefs:
+  - edulearn-secrets
+  - auth-secrets
+
+configData:
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: auth_service
+  POSTGRES_USER: postgres
+  POSTGRES_SSL_MODE: disable
+  DB_MAX_OPEN_CONNS: "25"
+  DB_MAX_IDLE_CONNS: "5"
+
+  # TEMPLATE CONFIG
+  TEMPLATE_BASE_DIR: dist/shared/templates
+  COMPANY_NAME: EduLearn
+  COMPANY_ADDRESS: EduLearn Inc., 456 Learning Avenue, San Francisco, CA 94102
+  SUPPORT_EMAIL: support@edulearn.com
+  BASE_URL: https://edulearn.com
+
+  # Social Links
+  TWITTER_URL: https://twitter.com/edulearn
+  FACEBOOK_URL: https://facebook.com/edulearn
+  LINKEDIN_URL: https://linkedin.com/company/edulearn
+  INSTAGRAM_URL: https://instagram.com/edulearn
+  YOUTUBE_URL: https://youtube.com/@edulearn
+
+  # REDIS CONFIGURATION
+  REDIS_DB: "1"
+  REDIS_MAX_CONNECTIONS: "100"
+  REDIS_MIN_CONNECTIONS: "10"
+  REDIS_TTL_DEFAULT: "86400"
+  REDIS_KEY_PREFIX: "edulearn:auth:"
+
+  # gRPC CONFIGURATION
+  GRPC_PORT: "50052"
+  GRPC_MAX_CONCURRENT_STREAMS: "100"
+  GRPC_MAX_CONNECTION_IDLE: 15s
+  GRPC_MAX_CONNECTION_AGE_GRACE: 5s
+
+  # KAFKA CONFIGURATION
+  KAFKA_CLIENT_ID: auth-service
+  KAFKA_CONSUMER_GROUP: auth-service-group
+  KAFKA_MAX_POLL_RECORDS: "100"
+  KAFKA_FETCH_MAX_BYTES: "5242880"
+  KAFKA_SASL_ENABLED: "false"
+
+  # HEALTH CHECK CONFIGURATION
+  HEALTH_PORT: "8086"
+  HEALTH_PATH: /health
+  READINESS_PORT: "8086"
+  READINESS_PATH: /ready
+  LIVENESS_PORT: "8086"
+  LIVENESS_PATH: /live
+
+secretData: {}
+
+configMounts: []

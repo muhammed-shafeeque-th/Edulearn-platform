@@ -1,0 +1,153 @@
+nameOverride: chat
+
+replicaCount: 2
+
+image:
+  repository: ghcr.io/muhammed-shafeeque-th/edulearn/chat
+  pullPolicy: IfNotPresent
+  tag: "v1.0.4"
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 50059
+  ports:
+   - name: grpc
+     port: 50059
+     targetPort: 50059
+   - name: websocket
+     port: 4009
+     targetPort: 4009
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: api.edulearn.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8086 # http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8086 # http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+
+env:
+  NODE_ENV: "development"
+  SERVICE_NAME: chat-service
+  serviceVersion: "0.0.1"
+  API_PORT: 4009
+  GRPC_PORT: 50059
+
+configMaps:
+  - edulearn-config
+  - chat-config
+
+secretRefs:
+  - edulearn-secrets
+  - chat-secrets
+
+configData:
+  DATABASE_HOST: "postgres"
+  DATABASE_PORT: "5432"
+  DATABASE_NAME: chat_service
+  DATABASE_MAX_CONNECTIONS: "50"
+  DATABASE_MIN_CONNECTIONS: "10"
+  DATABASE_CONNECTION_TIMEOUT: "30000"
+  DATABASE_IDLE_TIMEOUT: "10000"
+
+  # REDIS CONFIGURATION
+  REDIS_DB: "0"
+  REDIS_MAX_CONNECTIONS: "100"
+  REDIS_MIN_CONNECTIONS: "10"
+  REDIS_TTL_DEFAULT: "86400"
+  REDIS_KEY_PREFIX: "edulearn:chat:"
+
+  ALLOWED_ORIGINS: "*"
+
+  # gRPC CONFIGURATION
+  GRPC_PORT: "50059"
+  GRPC_MAX_CONCURRENT_STREAMS: "100"
+  GRPC_MAX_CONNECTION_IDLE: 15s
+  GRPC_MAX_CONNECTION_AGE: 30s
+  GRPC_MAX_CONNECTION_AGE_GRACE: 5s
+  GRPC_TIME: 2h
+  GRPC_TIMEOUT: 20s
+
+  # KAFKA CONFIGURATION
+  KAFKA_CLIENT_ID: chat-service
+  KAFKA_CONSUMER_GROUP: chat-service-group
+  KAFKA_MAX_POLL_RECORDS: "100"
+  KAFKA_FETCH_MAX_BYTES: "5242880"
+  KAFKA_SASL_ENABLED: "false"
+
+  # OBSERVABILITY CONFIGURATION
+
+  # OpenTelemetry Jaeger Tracing
+  JAEGER_SAMPLING_RATE: "0.1"
+  JAEGER_SAMPLING_TYPE: probabilistic
+
+  # Prometheus Metrics
+  PROMETHEUS_PATH: /metrics
+  METRICS_ENABLED: "true"
+
+  # Logging Configuration
+  LOG_LEVEL: debug
+  LOG_FORMAT: json
+  LOG_FILE: logs/chat-service.log
+  LOG_OUTPUT: stdout
+  LOG_MAX_SIZE: 100m
+  LOG_MAX_FILES: "5"
+  LOG_COMPRESS: "true"
+
+  # Tracing Configuration
+  TRACING_ENABLED: "true"
+  TRACING_SAMPLING_RATE: "0.1"
+  TRACING_SERVICE_NAME: chat-service
+
+
+  # HEALTH CHECK CONFIGURATION
+  HEALTH_PORT: "8086"
+  HEALTH_PATH: /health
+  READINESS_PORT: "8086"
+  READINESS_PATH: /ready
+  LIVENESS_PORT: "8086"
+  LIVENESS_PATH: /live
+
+secretData: {}
+
+configMounts: []
