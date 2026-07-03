@@ -1,0 +1,56 @@
+# Global settings
+global:
+  domain: edulearn
+
+# Enable/Disable components
+api-gateway:
+  enabled: true
+
+auth:
+  enabled: true
+
+user:
+  enabled: true
+
+course:
+  enabled: true
+
+payment:
+  enabled: true
+
+order:
+  enabled: true
+
+notification:
+  enabled: true
+
+chat:
+  enabled: true
+
+# Stateful components
+redis:
+  enabled: true
+
+kafka:
+  enabled: true
+
+postgres:
+  enabled: true
+
+# # You can override sub-chart values here
+# postgres:
+#   postgresql:
+#     auth:
+#       password: "postgres-password-change-in-prod"
+#     primary:
+#       persistence:
+#         size: 30Gi
+
+# redis:
+#   redis:
+#     auth:
+#       password: "redis-password-change-in-prod"
+
+# kafka:
+#   kafka:
+#     enabled: true

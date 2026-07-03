@@ -1,0 +1,88 @@
+apiVersion: v2
+name: edulearn
+description: EduLearn Platform Umbrella chart for EduLearn platform
+
+# A chart can be either an 'application' or a 'library' chart.
+#
+# Application charts are a collection of templates that can be packaged into versioned archives
+# to be deployed.
+#
+# Library charts provide useful utilities or functions for the chart developer. They're included as
+# a dependency of application charts to inject those utilities and functions into the rendering
+# pipeline. Library charts do not define any templates and therefore cannot be deployed.
+type: application
+
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+# Versions are expected to follow Semantic Versioning (https://semver.org/)
+version: 1.0.1
+
+# This is the version number of the application being deployed. This version number should be
+# incremented each time you make changes to the application. Versions are not expected to
+# follow Semantic Versioning. They should reflect the version the application is using.
+# It is recommended to use it with quotes.
+appVersion: "1.0.1"
+
+dependencies:
+  # Common Library
+  - name: edulearn-common
+    version: 1.0.0
+    repository: file://../edulearn-common
+
+  # Microservices
+  - name: api-gateway
+    version: 1.0.0
+    repository: file://../charts/api-gateway
+    condition: api-gateway.enabled
+
+  - name: auth
+    version: 1.0.0
+    repository: file://../charts/auth
+    condition: auth.enabled
+
+  - name: user
+    version: 1.0.0
+    repository: file://../charts/user
+    condition: user.enabled
+
+  - name: course
+    version: 1.0.0
+    repository: file://../charts/course
+    condition: course.enabled
+
+  - name: payment
+    version: 1.0.0
+    repository: file://../charts/payment
+    condition: payment.enabled
+
+  - name: order
+    version: 1.0.0
+    repository: file://../charts/order
+    condition: order.enabled
+
+
+  - name: notification
+    version: 1.0.0
+    repository: file://../charts/notification
+    condition: notification.enabled
+
+  - name: chat
+    version: 1.0.0
+    repository: file://../charts/chat
+    condition: chat.enabled
+
+  # Infrastructure / Stateful Services
+  - name: redis
+    version: 1.0.0
+    repository: file://../charts/redis
+    condition: redis.enabled
+
+  - name: kafka
+    version: 1.0.0
+    repository: file://../charts/kafka
+    condition: kafka.enabled
+
+  - name: postgres
+    version: 1.0.0
+    repository: file://../charts/postgres
+    condition: postgres.enabled
