@@ -1,0 +1,10 @@
+apiVersion: gateway.k8s.aws/v1beta1
+kind: TargetGroupConfiguration
+metadata:
+  name: app-tg-config
+  namespace: edulearn-app
+spec:
+  targetReference:
+    name: edulearn-gateway
+  defaultConfiguration:
+    targetType: ip

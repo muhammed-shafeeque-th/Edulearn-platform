@@ -1,0 +1,23 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: http-app-route
+  namespace: edulearn-app
+spec:
+  hostnames:
+    - "app.muhammedshafeeque.online"
+  parentRefs:
+  - group: gateway.networking.k8s.io
+    namespace: default
+    kind: Gateway
+    name: app-alb-gateway
+    sectionName: http
+  - group: gateway.networking.k8s.io
+    namespace: default
+    kind: Gateway
+    name: app-alb-gateway
+    sectionName: https
+  rules:
+  - backendRefs:
+    - name: edulearn-gateway
+      port: 80
