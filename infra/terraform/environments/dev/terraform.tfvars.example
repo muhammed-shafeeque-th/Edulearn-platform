@@ -1,0 +1,26 @@
+region = "your-region"
+
+cluster_name = "your-cluster"
+
+// Your preferred cidr
+vpc_cidr = "10.0.0.0/16"
+
+// Your preferred subnets
+public_subnets = [
+  "10.0.1.0/24",
+  "10.0.2.0/24",
+  "10.0.3.0/24",
+]
+
+// Your preferred subnets
+private_subnets = [
+  "10.0.101.0/24",
+  "10.0.102.0/24",
+  "10.0.103.0/24"
+]
+
+environment = "your env"
+
+azs = ["your-region-1a", "your-region-1b", "your-region-1c"]
+
+terraform_user_arn = "arn:aws:iam::<ACC_ID>:user/<ROLE_ID>"

@@ -1,0 +1,38 @@
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: edulearn-image-updater
+  namespace: argocd
+spec:
+  namespace: argocd
+  applicationRefs:
+    - namePattern: "edulearn-*"
+
+      commonUpdateSettings:
+        updateStrategy: "newest-build"
+        allowTags: "regexp:^sha-[a-f0-9]{7,40}$"
+
+      images:
+        - alias: gateway
+          imageName: ghcr.io/muhammed-shafeeque-th/edulearn/gateway
+
+        - alias: auth
+          imageName: ghcr.io/muhammed-shafeeque-th/edulearn/auth
+
+        - alias: user
+          imageName: ghcr.io/muhammed-shafeeque-th/edulearn/user
+
+        - alias: notification
+          imageName: ghcr.io/muhammed-shafeeque-th/edulearn/notification
+
+        - alias: course
+          imageName: ghcr.io/muhammed-shafeeque-th/edulearn/course
+
+        - alias: order
+          imageName: ghcr.io/muhammed-shafeeque-th/edulearn/order
+
+        - alias: payment
+          imageName: ghcr.io/muhammed-shafeeque-th/edulearn/payment
+
+        - alias: chat
+          imageName: ghcr.io/muhammed-shafeeque-th/edulearn/chat
