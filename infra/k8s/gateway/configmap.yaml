@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-config
+  namespace: edulearn
+  labels:
+    app: gateway-service
+data:
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: gateway_service
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: password
+  POSTGRES_SSL_MODE: disable
+  DB_MAX_OPEN_CONNS: "25"
+  DB_MAX_IDLE_CONNS: "5"
+  DB_CONN_MAX_LIFETIME: 5m
+  DB_CONN_MAX_IDLE_TIME: 5m
+
+  # SMTP CONFIGURATION
+  SMTP_PORT: "587"
+  SMTP_TLS_ENABLED: "true"
+  SMTP_TLS_SKIP_VERIFY: "false"
+  SMTP_RATE_LIMIT_RPM: "60"
+  SMTP_RATE_LIMIT_BURST: "1"
+
+  # WEBSOCKET CONFIGURATION
+  WS_PORT: "4001"
+
+  # gRPC CONFIGURATION
+  GRPC_PORT: "50056"
+  GRPC_MAX_CONCURRENT_STREAMS: "100"
+  GRPC_MAX_CONNECTION_IDLE: 15s
+  GRPC_MAX_CONNECTION_AGE: 30s
+  GRPC_MAX_CONNECTION_AGE_GRACE: 5s
+  GRPC_TIME: 2h
+  GRPC_TIMEOUT: 20s
+
+  # OBSERVABILITY CONFIGURATION
+
+  # OpenTelemetry Jaeger Tracing
+  JAEGER_HOST: jaeger
+  JAEGER_PORT: "6831"
+  JAEGER_ENDPOINT: http://jaeger:4318
+  JAEGER_SAMPLING_RATE: "0.1"
+  JAEGER_SAMPLING_TYPE: probabilistic
+
+  # Prometheus Metrics
+  PROMETHEUS_PORT: "9091"
+  PROMETHEUS_PATH: /metrics
+  METRICS_ENABLED: "true"
+
+  # Loki Logging
+  LOKI_URL: http://loki:3100
+  LOKI_USERNAME: ""
+  LOKI_PASSWORD: ""
+
+  # Logging Configuration
+  LOG_LEVEL: debug
+  LOG_FORMAT: json
+  LOG_FILE: logs/gateway-service.log
+  LOG_OUTPUT: stdout
+  LOG_MAX_SIZE: 100m
+  LOG_MAX_FILES: "5"
+  LOG_COMPRESS: "true"
+
+  # Tracing Configuration
+  TRACING_ENABLED: "true"
+  TRACING_SAMPLING_RATE: "0.1"
+  TRACING_SERVICE_NAME: gateway-service
+
+  #OTP_TEMPLATE_PATH=app\internal\shared\template\activation-mail.html
+
+  # HEALTH CHECK CONFIGURATION
+  HEALTH_PORT: "8086"
+  HEALTH_PATH: /health
+  READINESS_PORT: "8086"
+  READINESS_PATH: /ready
+  LIVENESS_PORT: "8086"
+  LIVENESS_PATH: /live

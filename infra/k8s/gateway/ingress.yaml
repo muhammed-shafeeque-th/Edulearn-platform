@@ -1,0 +1,58 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: edulearn-ingress
+  namespace: edulearn
+  annotations:
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:494915081352:certificate/f680426b-c4e7-408c-bd4e-aa3da8774c79
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+spec:
+  ingressClassName: alb
+  rules:
+    - host: api.edulearn.muhammedshafeeque.online
+      http:
+        paths:
+          # WebSocket (Chat )
+          - path: /chat
+            pathType: Prefix
+            backend:
+              service:
+                name: chat-svc
+                port:
+                  number: 4009
+          # Notification Service
+          - path: /notifications
+            pathType: Prefix
+            backend:
+              service:
+                name: notification-svc
+                port:
+                  number: 4001
+
+          # Payment Webhook
+          - path: /api/webhooks
+            pathType: Prefix
+            backend:
+              service:
+                name: payment-svc
+                port:
+                  number: 4005
+           # API Gateway
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 4000
+    #       # Grafana
+    #       - path: /
+    #         pathType: Prefix
+    #         backend:
+    #           service:
+    #             name: monitoring-grafana
+    #             port:
+    #               number: 80

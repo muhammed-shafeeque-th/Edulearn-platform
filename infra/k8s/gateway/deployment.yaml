@@ -1,0 +1,256 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: edulearn
+  labels:
+    app: api-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+       # serviceAccountName: edulearn-sa 
+       containers:
+        - name: gateway
+          image: edulearn-gateway:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4000
+          env:
+            - name: NODE_ENV
+              value: "development"
+            - name: serviceVersion
+              value: "0.0.1"
+            - name: PORT
+              value: "4000"
+            - name: SERVICE_NAME
+              value: "api-gateway"
+            # CORS configs
+            - name: ALLOWED_ORIGINS
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: ALLOWED_ORIGINS
+            - name: ALLOWED_METHODS
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: ALLOWED_METHODS
+          # JWT configs
+            - name: JWT_ACCESS_TOKEN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: edulearn-secrets
+                  key: JWT_ACCESS_TOKEN_SECRET
+            - name: JWT_REFRESH_TOKEN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: edulearn-secrets
+                  key: JWT_REFRESH_TOKEN_SECRET
+            - name: JWT_ACCESS_TOKEN_EXPIRY
+              valueFrom:
+                secretKeyRef:
+                  name: edulearn-secrets
+                  key: JWT_ACCESS_TOKEN_EXPIRY
+            - name: JWT_REFRESH_TOKEN_EXPIRY
+              valueFrom:
+                secretKeyRef:
+                  name: edulearn-secrets
+                  key: JWT_REFRESH_TOKEN_EXPIRY
+            # - name: JWT_TOKEN_AUDIENCE
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: edulearn-secrets
+            #       key: JWT_TOKEN_AUDIENCE
+            # - name: JWT_TOKEN_ISSUER
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: edulearn-secrets
+            #       key: JWT_TOKEN_ISSUER
+
+          # REDIS configs
+            - name: REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: REDIS_URL
+      
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: REDIS_HOST
+            - name: REDIS_LAZY_CONNECT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: REDIS_LAZY_CONNECT
+            # - name: IS_CLUSTER
+            #   valueFrom:
+            #     configMapKeyRef:
+            #       name: edulearn-config
+            #       key: IS_CLUSTER
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: REDIS_PORT
+          # Service Grpc config
+            - name: USER_SERVICE_GRPC
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: USER_SERVICE_GRPC
+            - name: AUTH_SERVICE_GRPC
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: AUTH_SERVICE_GRPC
+            - name: PAYMENT_SERVICE_GRPC
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: PAYMENT_SERVICE_GRPC
+            - name: ORDER_SERVICE_GRPC
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: ORDER_SERVICE_GRPC
+            - name: NOTIFICATION_SERVICE_GRPC
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: NOTIFICATION_SERVICE_GRPC
+            - name: CHAT_SERVICE_GRPC
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config 
+                  key: CHAT_SERVICE_GRPC
+            - name: COURSE_SERVICE_GRPC
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: COURSE_SERVICE_GRPC
+            # Cloudinary configs
+            - name: CLOUDINARY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: gateway-secrets
+                  key: CLOUDINARY_API_KEY
+            - name: CLOUDINARY_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: gateway-secrets
+                  key: CLOUDINARY_API_SECRET
+            - name: CLOUDINARY_CLOUD_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: gateway-secrets
+                  key: CLOUDINARY_CLOUD_NAME
+            # S3 configs
+            - name: AWS_S3_REGION
+              valueFrom:
+                secretKeyRef:
+                  name: gateway-secrets
+                  key: AWS_S3_REGION
+            - name: AWS_S3_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: gateway-secrets
+                  key: AWS_S3_API_KEY
+            - name: AWS_S3_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: gateway-secrets
+                  key: AWS_S3_API_SECRET
+            
+            - name: AWS_S3_BUCKET_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: gateway-secrets
+                  key: AWS_S3_BUCKET_NAME
+            
+            - name: AWS_S3_SECURE_BUCKET_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: gateway-secrets
+                  key: AWS_S3_SECURE_BUCKET_NAME
+            - name: AWS_S3_SECURE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: gateway-secrets
+                  key: AWS_S3_SECURE_API_KEY
+            - name: AWS_S3_SECURE_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: gateway-secrets
+                  key: AWS_S3_SECURE_API_SECRET
+            - name: AWS_S3_SECURE_REGION
+              valueFrom:
+                secretKeyRef:
+                  name: gateway-secrets
+                  key: AWS_S3_SECURE_REGION
+          # Observability config
+            #Jaeger
+            - name: JAEGER_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_ENDPOINT
+            - name: JAEGER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_PORT
+            - name: JAEGER_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_HOST
+            - name: JAEGER_SAMPLING_RATE
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_SAMPLING_RATE
+            # Prometheus
+            - name: PROMETHEUS_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: PROMETHEUS_PATH
+            # Logger
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: gateway-config
+                  key: LOG_LEVEL
+            - name: LOKI_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: LOKI_URL
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+          # livenessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 4000
+          #   initialDelaySeconds: 15
+          #   periodSeconds: 10
+          # readinessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 4000
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 5
