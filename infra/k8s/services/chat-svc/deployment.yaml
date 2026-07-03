@@ -1,0 +1,174 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chat-service
+  namespace: edulearn
+  labels:
+    app: chat-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chat-service
+  template:
+    metadata:
+      labels:
+        app: chat-service
+    spec:
+      # serviceAccountName: edulearn-sa 
+      containers:
+        - name: chat-service
+          image: edulearn-chat:latest
+          ports:
+            - containerPort: 50059
+          env:
+            - name: NODE_ENV
+              value: "development"
+            - name: SERVICE_NAME
+              value: "chat-service"
+            - name: SERVICE_VERSION
+              value: "0.0.1"
+            - name: API_PORT
+              value: '4009'
+
+            - name: ALLOWED_ORIGINS
+              valueFrom:
+                configMapKeyRef:
+                  name: chat-config
+                  key: ALLOWED_ORIGINS
+            - name: GRPC_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: chat-config
+                  key: GRPC_PORT
+            # Services url
+            - name: COURSE_SERVICE_GRPC
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: COURSE_SERVICE_GRPC
+            - name: USER_SERVICE_GRPC
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: USER_SERVICE_GRPC
+            # DB configs
+            - name: MONGODB_CONNECTION_URL
+              valueFrom:
+                secretKeyRef:
+                  name: chat-secrets
+                  key: MONGODB_CONNECTION_URL
+            - name: DATABASE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: chat-config
+                  key: DATABASE_NAME
+            # REDIS configs
+            - name: REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: REDIS_URL            
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: REDIS_HOST
+            - name: REDIS_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: chat-config
+                  key: REDIS_DB
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: REDIS_PORT
+
+            # Kafka configs
+            - name: KAFKA_BROKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: KAFKA_BROKERS
+            - name: KAFKA_CLIENT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: chat-config
+                  key: KAFKA_CLIENT_ID
+            - name: KAFKA_CONSUMER_GROUP
+              valueFrom:
+                configMapKeyRef:
+                  name: chat-config
+                  key: KAFKA_CONSUMER_GROUP
+
+            - name: JWT_ACCESS_TOKEN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: edulearn-secrets
+                  key: JWT_ACCESS_TOKEN_SECRET
+            - name: JWT_TOKEN_EXPIRY
+              valueFrom:
+                secretKeyRef:
+                  name: edulearn-secrets
+                  key: JWT_ACCESS_TOKEN_EXPIRY
+            # Observability config
+            #Jaeger
+            - name: JAEGER_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_ENDPOINT
+            - name: JAEGER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_PORT
+            - name: JAEGER_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_HOST
+            - name: JAEGER_SAMPLING_RATE
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_SAMPLING_RATE
+            # Prometheus
+            - name: PROMETHEUS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: PROMETHEUS_PORT
+            # Logger
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: chat-config
+                  key: LOG_LEVEL
+            - name: LOKI_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: LOKI_URL
+        
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+          # livenessProbe:
+          #   httpGet:
+          #     path: "/health"
+          #     port: 3000
+          #   initialDelaySeconds: 15
+          #   periodSeconds: 10
+          # readinessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 3000
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 5
+
