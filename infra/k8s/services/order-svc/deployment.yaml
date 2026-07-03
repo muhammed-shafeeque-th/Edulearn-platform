@@ -1,0 +1,161 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: edulearn
+  labels:
+    app: order-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      serviceAccountName: edulearn-sa 
+      containers:
+        - name: order-service
+          image: 494915081352.dkr.ecr.ap-south-1.amazonaws.com/edulearn-order:latest
+          ports:
+            - containerPort: 50054
+          env:
+            - name: NODE_ENV
+              value: "development"
+            - name: SERVICE_NAME
+              value: "OrderService"
+            - name: SERVICE_VERSION
+              value: "0.0.1"
+            - name: API_PORT
+              value: '3004'
+            - name: GRPC_PORT
+              value: '50054'
+
+            # Services url
+            - name: COURSE_SERVICE_GRPC
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: COURSE_SERVICE_GRPC
+            - name: COURSE_SERVICE_GRPC
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: COURSE_SERVICE_GRPC
+            - name: USER_SERVICE_GRPC
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: USER_SERVICE_GRPC
+            - name: SESSION_SERVICE_GRPC
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: SESSION_SERVICE_GRPC
+            # DB configs
+            - name: DATABASE_URL_ASYNC
+              valueFrom:
+                secretKeyRef:
+                  name: order-secrets
+                  key: DATABASE_URL_ASYNC
+            - name: DATABASE_URL_SYNC
+              valueFrom:
+                secretKeyRef:
+                  name: order-secrets
+                  key: DATABASE_URL_SYNC
+            # REDIS configs
+            - name: REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: REDIS_URL
+
+            # Kafka configs
+            - name: KAFKA_BROKER
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: KAFKA_BROKERS
+            - name: KAFKA_CLIENT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: order-config
+                  key: KAFKA_CLIENT_ID
+            - name: KAFKA_CONSUMER_GROUP
+              valueFrom:
+                configMapKeyRef:
+                  name: order-config
+                  key: KAFKA_CONSUMER_GROUP
+
+            - name: JWT_ACCESS_TOKEN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: edulearn-secrets
+                  key: JWT_ACCESS_TOKEN_SECRET
+            - name: JWT_TOKEN_EXPIRY
+              valueFrom:
+                secretKeyRef:
+                  name: edulearn-secrets
+                  key: JWT_ACCESS_TOKEN_EXPIRY
+            # Observability config
+            #Jaeger
+            - name: JAEGER_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_ENDPOINT
+            - name: JAEGER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_PORT
+            - name: JAEGER_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_HOST
+            - name: JAEGER_SAMPLING_RATE
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_SAMPLING_RATE
+            # Prometheus
+            - name: PROMETHEUS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: PROMETHEUS_PORT
+            # Logger
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: order-config
+                  key: LOG_LEVEL
+            - name: LOKI_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: LOKI_URL
+        
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+          # livenessProbe:
+          #   httpGet:
+          #     path: "/health"
+          #     port: 3000
+          #   initialDelaySeconds: 15
+          #   periodSeconds: 10
+          # readinessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 3000
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 5
+
