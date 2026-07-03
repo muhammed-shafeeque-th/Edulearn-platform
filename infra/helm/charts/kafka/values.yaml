@@ -1,0 +1,11 @@
+kafka:
+  enabled: true
+  replicas: 3
+  persistence:
+    enabled: true
+    size: 50Gi
+  zookeeper:
+    enabled: true
+    persistence:
+      enabled: true
+      size: 10Gi
