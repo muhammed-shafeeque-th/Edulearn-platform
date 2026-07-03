@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: course-service
+  namespace: edulearn
+  labels:
+    app: course-service
+spec:
+  replicas: 2 # Start with 2 replicas for high availability
+  selector:
+    matchLabels:
+      app: course-service
+  template:
+    metadata:
+      labels:
+        app: course-service
+    spec:
+      # Pod anti-affinity to spread pods across nodes for better availability
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: course-service
+                topologyKey: kubernetes.io/hostname
+      # Use a service account (optional, for RBAC)
+      serviceAccountName: course-service-sa
+      containers:
+        - name: course-service
+          image: course-service:latest # Replace with your image name (e.g., from a registry)
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3001
+              name: grpc-http
+          env:
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: course-service-config
+                  key: NODE_ENV
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: course-service-config
+                  key: LOG_LEVEL
+            - name: OTLP_COLLECTOR_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: course-service-config
+                  key: OTLP_COLLECTOR_URL
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: course-service-secrets
+                  key: DATABASE_URL
+            - name: KAFKA_BROKERS
+              valueFrom:
+                secretKeyRef:
+                  name: course-service-secrets
+                  key: KAFKA_BROKERS
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: course-service-secrets
+                  key: REDIS_URL
+            - name: GRPC_USER_SERVICE
+              valueFrom:
+                secretKeyRef:
+                  name: course-service-secrets
+                  key: GRPC_USER_SERVICE
+          # Resource limits and requests
+          resources:
+            requests:
+              cpu: "200m" # 0.2 CPU cores
+              memory: "256Mi"
+            limits:
+              cpu: "500m" # 0.5 CPU cores
+              memory: "512Mi"
+          # Liveness and readiness probes
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          # Security context
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000 # Match the appuser UID from the Dockerfile
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL

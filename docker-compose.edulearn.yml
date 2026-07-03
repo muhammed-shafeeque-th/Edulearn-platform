@@ -1,0 +1,630 @@
+version: '3.8'
+services:
+# =============================================================================
+  # LOKI - LOG AGGREGATION
+  # =============================================================================
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    profiles:
+      - observability
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/loki-config.yaml
+    volumes:
+      - ./observability-config/config/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+      - loki-data:/loki
+    environment:
+      - LOKI_CONFIG=/etc/loki/loki-config.yaml
+    networks:
+      - observability
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3100/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.2'
+          memory: 256M
+
+  # =============================================================================
+  # JAEGER - DISTRIBUTED TRACING
+  # =============================================================================
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    profiles:
+      - observability
+    ports:
+      - "16686:16686"  # UI
+      - "14268:14268"  # HTTP collector
+      - "14250:14250"  # gRPC collector
+      - "6831:6831/udp"  # UDP collector
+      - "6832:6832/udp"  # UDP collector (legacy)
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+    volumes:
+      - jaeger-data:/tmp
+    networks:
+      - observability
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:16686/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.2'
+          memory: 256M
+
+  # =============================================================================
+  # PROMETHEUS - METRICS COLLECTION
+  # =============================================================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    profiles:
+      - observability
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    volumes:
+      - ./observability-config/config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./observability-config/config/alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - observability
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+        reservations:
+          cpus: '0.2'
+          memory: 512M
+
+  # =============================================================================
+  # ALERTMANAGER - ALERT HANDLING
+  # =============================================================================
+  # alertmanager:
+  #   image: prom/alertmanager:latest
+  #   container_name: alertmanager
+  #   profiles:
+  #     - observability
+  #   ports:
+  #     - "9093:9093"
+  #   command:
+  #     - '--config.file=/etc/alertmanager/alertmanager.yml'
+  #     - '--storage.path=/alertmanager'
+  #   volumes:
+  #     - ./observability-config/config/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+  #     - alertmanager-data:/alertmanager
+  #   networks:
+  #     - observability
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9093/-/healthy"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 30s
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '0.3'
+  #         memory: 256M
+  #       reservations:
+  #         cpus: '0.1'
+  #         memory: 128M
+
+  # =============================================================================
+  # GRAFANA - VISUALIZATION
+  # =============================================================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    profiles:
+      - observability
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    volumes:
+      - ./observability-config/config/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./observability-config/config/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    networks:
+      - observability
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.2'
+          memory: 256M
+
+  # =============================================================================
+  # KAFKA - MESSAGE BROKER
+  # =============================================================================
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.4
+    container_name: zookeeper
+    profiles:
+      - infra
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-logs:/var/lib/zookeeper/log
+    networks:
+      - observability
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc localhost 2181 | grep imok"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 256M
+    
+  kafka:
+    image: confluentinc/cp-kafka:7.4.4
+    container_name: kafka
+    profiles:
+      - infra
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "9101:9101"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+
+      # --- LISTENERS ---
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://127.0.0.1:9092
+      # --- SECURITY MAP (THIS WAS THE BUG) ---
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+
+      # --- SINGLE NODE SETTINGS ---
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+
+      # --- MISC ---
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+
+      # --- JMX ---
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks:
+      - observability
+    restart: unless-stopped
+
+
+  # kafka:
+  #   image: confluentinc/cp-kafka:7.4.4
+  #   container_name: kafka
+  #   profiles:
+  #     - infra
+  #   depends_on:
+  #     - zookeeper
+  #   ports:
+  #     - "9092:9092"
+  #     - "9101:9101"
+  #   environment:
+  #     KAFKA_BROKER_ID: 1
+  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  #     KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092
+  #     KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #     KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+  #     KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+  #     KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+  #     KAFKA_JMX_PORT: 9101
+  #     KAFKA_JMX_HOSTNAME: localhost
+  #     KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+  #     KAFKA_DELETE_TOPIC_ENABLE: 'true'
+  #   volumes:
+  #     - kafka-data:/var/lib/kafka/data
+  #   networks:
+  #     - observability
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list || kafka-topics --bootstrap-server localhost:29092 --list"]
+  #     interval: 20s
+  #     timeout: 10s
+  #     retries: 10
+  #     start_period: 90s
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '0.5'
+  #         memory: 1G
+  #       reservations:
+  #         cpus: '0.2'
+  #         memory: 512M
+
+  # =============================================================================
+  # REDIS - CACHING
+  # =============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    profiles:
+      - infra
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks:
+      - observability
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 256M
+
+  # =============================================================================
+  # POSTGRESQL - DATABASE
+  # =============================================================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres
+    profiles:
+      - infra
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: edulearn
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./observability-config/config/postgres-init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./observability-config/config/create-databases.sql:/docker-entrypoint-initdb.d/02-create-databases.sql:ro
+    networks:
+      - observability
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d edulearn"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+        reservations:
+          cpus: '0.2'
+          memory: 512M
+
+  # =============================================================================
+  # DOMAIN SERVICES 
+  # =============================================================================
+  auth_svc:
+    profiles: ["auth", "domains"]
+    # build:
+    #   context: ./auth
+    #   dockerfile: Dockerfile
+    image: edulearn-auth:v1
+    container_name: auth_svc
+    depends_on:
+      kafka:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    # environment:
+    #   POSTGRES_HOST: postgres
+    #   POSTGRES_PORT: "5432"
+    #   REDIS_URL: redis://redis:6379/0
+    #   KAFKA_BROKERS: kafka:29092
+    #   JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+    #   LOKI_URL: http://loki:3100
+    env_file:
+      - ./auth/.env.production
+    networks:
+      - observability
+    ports:
+      - "50051:50051"
+      - "3001:3001"
+    restart: unless-stopped
+
+  notification_svc:
+    profiles: ["notification", "domains"]
+    # build:
+    #   context: ./notification
+    #   dockerfile: Dockerfile
+    image: edulearn-notification:v1
+    container_name: notification_svc
+    depends_on:
+      kafka:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    # environment:
+      # DATABASE_DSNs: postgresql://postgres:password@postgres:5432/notification_service?sslmode=disable
+      # REDIS_ADDR: redis:6379
+      # KAFKA_BROKERS: kafka:29092
+      # JAEGER_HOST: jaeger
+      # JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      # LOKI_URL: http://loki:3100
+    env_file:
+      - ./notification/.env
+    networks:
+      - observability
+    ports:
+      - "4001:4001"
+      - "50056:50056"
+    restart: unless-stopped
+
+  user_svc:
+    profiles: ["user", "domains"]
+    # build:
+    #   context: ./user
+    #   dockerfile: Dockerfile
+    image: edulearn-user:v1
+    container_name: user_svc
+    depends_on:
+      kafka:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    # environment:
+    #   POSTGRES_HOST: postgres
+    #   POSTGRES_PORT: "5432"
+    #   REDIS_URL: redis://redis:6379/0
+    #   KAFKA_BROKERS: kafka:29092
+    #   JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+    #   LOKI_URL: http://loki:3100
+    env_file:
+      - ./user/.env.production
+    networks:
+      - observability
+    ports:
+    - "50052:50052"
+    restart: unless-stopped
+
+  course_svc:
+    profiles: ["course", "domains"]
+    # build:
+    #   context: ./course
+    #   dockerfile: Dockerfile
+    image: edulearn-course:v1
+    container_name: course_svc
+    depends_on:
+      kafka:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    # environment:
+    #   POSTGRES_HOST: postgres
+    #   POSTGRES_PORT: "5432"
+    #   REDIS_URL: redis://redis:6379/0
+    #   KAFKA_BROKERS: kafka:29092
+    #   JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+    #   LOKI_URL: http://loki:3100
+    env_file:
+      - ./course/.env.production
+    ports:
+    - "50053:50053"
+    networks:
+      - observability
+    restart: unless-stopped
+
+  payment_svc:
+    profiles: ["payment", "domains"]
+    # build:
+    #   context: ./payment
+    #   dockerfile: Dockerfile
+    image: edulearn-payment:v1
+    container_name: payment_svc
+    depends_on:
+      kafka:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    # environment:
+    #   POSTGRES_HOST: postgres
+    #   POSTGRES_PORT: "5432"
+    #   REDIS_URL: redis://redis:6379/0
+    #   KAFKA_BROKERS: kafka:29092
+    #   JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+    #   LOKI_URL: http://loki:3100
+    env_file:
+      - ./payment/.env
+    networks:
+      - observability
+    ports:
+    - "50055:50055"
+    - "4005:4005"
+    restart: unless-stopped
+  chat_svc:
+    profiles: ["chat", "domains"]
+    # build:
+    #   context: ./chat
+    #   dockerfile: Dockerfile
+    image: edulearn-chat:v1
+    container_name: chat_svc
+    depends_on:
+      kafka:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    # environment:
+    #   POSTGRES_HOST: postgres
+    #   POSTGRES_PORT: "5432"
+    #   REDIS_URL: redis://redis:6379/0
+    #   KAFKA_BROKERS: kafka:29092
+    #   JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+    #   LOKI_URL: http://loki:3100
+    env_file:
+      - ./chat/.env.production
+    networks:
+      - observability
+    ports:
+    - "50059:50059"
+    - "4009:4009"
+    restart: unless-stopped
+
+  order_svc:
+    profiles: ["order", "domains"]
+    # build:
+    #   context: ./order
+    #   dockerfile: Dockerfile
+    image: edulearn-order:v1
+    container_name: order_svc
+    depends_on:
+      kafka:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    # environment:
+    #   KAFKA_BROKERS: kafka:29092
+    #   JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+    networks:
+      - observability
+    env_file:
+      - ./order/.env
+    ports:
+    - "50054:50054"
+    restart: unless-stopped
+
+  api_gateway:
+    profiles: ["api", "domains"]
+    # build:
+    #   context: ./api-gateway
+    #   dockerfile: Dockerfile
+    image: edulearn-gateway:v1
+    container_name: api_gateway
+    depends_on:
+      redis:
+        condition: service_healthy
+      # loki:
+      #   condition: service_healthy
+      # jaeger:
+      #   condition: service_healthy
+    # environment:
+    #   JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+    #   LOKI_URL: http://loki:3100
+    networks:
+      - observability
+    env_file:
+      - ./api-gateway/.env.production
+    ports:
+      - "4000:4000"
+    restart: unless-stopped
+# =============================================================================
+# NETWORKS
+# =============================================================================
+networks:
+  observability:
+    driver: bridge
+
+# =============================================================================
+# VOLUMES
+# =============================================================================
+volumes:
+  loki-data:
+    driver: local
+  jaeger-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  alertmanager-data:
+    driver: local
+  grafana-data:
+    driver: local
+  zookeeper-data:
+    driver: local
+  zookeeper-logs:
+    driver: local
+  kafka-data:
+    driver: local
+  redis-data:
+    driver: local
+  postgres-data:
+    driver: local 

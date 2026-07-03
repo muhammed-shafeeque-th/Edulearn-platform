@@ -1,0 +1,19 @@
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: chat-svc
+  namespace: edulearn
+spec: 
+  selector:
+    app: chat-service
+  ports:
+    - name: grpc
+      port: 50059
+      targetPort: 50059
+    - name: websocket
+      port: 4009
+      targetPort: 4009
+  type: ClusterIP
+
+

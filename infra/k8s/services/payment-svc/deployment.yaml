@@ -1,0 +1,231 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: edulearn
+  labels:
+    app: payment-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      # serviceAccountName: edulearn-sa 
+      containers:
+        - name: payment-service
+          image: edulearn-payment:latest
+          ports:
+            - containerPort: 50055
+          env:
+            - name: NODE_ENV
+              value: "development"
+            - name: SERVICE_NAME
+              value: "payment-service"
+            - name: SERVICE_VERSION
+              value: "0.0.1"
+            - name: API_PORT
+              value: '4005'
+            - name: GRPC_PORT
+              value: '50055'
+
+            - name: ALLOWED_ORIGINS
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: ALLOWED_ORIGINS
+            # Services url
+            - name: COURSE_SERVICE_GRPC
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: COURSE_SERVICE_GRPC
+            - name: USER_SERVICE_GRPC
+            - name: ORDER_SERVICE_GRPC
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: ORDER_SERVICE_GRPC
+            - name: USER_SERVICE_GRPC
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: USER_SERVICE_GRPC
+            # DB configs
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: payment-secrets
+                  key: DATABASE_URL
+            - name: DATABASE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: payment-config
+                  key: POSTGRES_DB
+            # REDIS configs
+            - name: REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: REDIS_URL            
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: REDIS_HOST
+            - name: REDIS_KEY_PREFIX
+              valueFrom:
+                configMapKeyRef:
+                  name: payment-config
+                  key: REDIS_KEY_PREFIX
+            - name: REDIS_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: payment-config
+                  key: REDIS_DB
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: REDIS_PORT
+            # Exchange config
+            - name: OPENEXCHANGE_APP_ID
+              valueFrom:
+                secretKeyRef:
+                  name: payment-secrets
+                  key: OPENEXCHANGE_APP_ID
+            - name: EXCHANGERATEHOST_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: payment-secrets
+                  key: EXCHANGERATEHOST_API_KEY
+            # Payment Providers config
+            # Stripe
+            - name: STRIPE_PUBLISHABLE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: payment-secrets
+                  key: STRIPE_PUBLISHABLE_KEY
+            - name: STRIPE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: payment-secrets
+                  key: STRIPE_SECRET_KEY
+            - name: STRIPE_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: payment-secrets
+                  key: STRIPE_WEBHOOK_SECRET
+            # Paypal
+            - name: PAYPAL_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: payment-secrets
+                  key: PAYPAL_CLIENT_ID
+            - name: PAYPAL_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: payment-secrets
+                  key: PAYPAL_SECRET
+            - name: PAYPAL_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: payment-secrets
+                  key: PAYPAL_WEBHOOK_SECRET
+            # Razorpay
+            - name: RAZORPAY_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: payment-secrets
+                  key: RAZORPAY_KEY_ID
+            - name: RAZORPAY_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: payment-secrets
+                  key: RAZORPAY_SECRET
+            - name: RAZORPAY_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: payment-secrets
+                  key: RAZORPAY_WEBHOOK_SECRET
+            # Kafka configs
+            - name: KAFKA_BROKER
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: KAFKA_BROKERS
+            - name: KAFKA_CLIENT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: payment-config
+                  key: KAFKA_CLIENT_ID
+            - name: KAFKA_CONSUMER_GROUP
+              valueFrom:
+                configMapKeyRef:
+                  name: payment-config
+                  key: KAFKA_CONSUMER_GROUP
+
+            # Observability config
+            #Jaeger
+            - name: JAEGER_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_ENDPOINT
+            - name: JAEGER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_PORT
+            - name: JAEGER_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_HOST
+            - name: JAEGER_SAMPLING_RATE
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_SAMPLING_RATE
+            # Prometheus
+            - name: PROMETHEUS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: PROMETHEUS_PORT
+            # Logger
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: payment-config
+                  key: LOG_LEVEL
+            - name: LOKI_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: LOKI_URL
+        
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+          # livenessProbe:
+          #   httpGet:
+          #     path: "/health"
+          #     port: 3000
+          #   initialDelaySeconds: 15
+          #   periodSeconds: 10
+          # readinessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 3000
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 5
+

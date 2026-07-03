@@ -1,0 +1,181 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+  namespace: edulearn
+  labels:
+    app: notification-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+    spec:
+      # serviceAccountName: edulearn-sa 
+      containers:
+        - name: notification-service
+          image: edulearn-notification:latest
+          ports:
+            - containerPort: 50056
+          env:
+            - name: ENVIRONMENT
+              value: "development"
+            - name: SERVICE_NAME
+              value: "notification-service"
+            - name: SERVICE_VERSION
+              value: "0.0.1"
+            - name: API_PORT
+              value: '3006'
+            - name: GRPC_PORT
+              value: '50056'
+            - name: WS_PORT
+              value: '4001'
+
+            - name: TEMPLATE_BASE_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: notification-config
+                  key: TEMPLATE_BASE_PATH
+            - name: ALLOWED_ORIGINS
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: ALLOWED_ORIGINS
+            # DB configs
+            - name: DATABASE_DSN
+              valueFrom:
+                secretKeyRef:
+                  name: notification-secrets
+                  key: DATABASE_DSN
+            # REDIS configs
+            - name: REDIS_ADDR
+              valueFrom:
+                secretKeyRef:
+                  name: notification-secrets
+                  key: REDIS_ADDR
+
+            # Kafka configs
+            - name: KAFKA_BROKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: KAFKA_BROKERS
+            - name: KAFKA_WORKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: notification-config
+                  key: KAFKA_WORKERS
+            - name: KAFKA_CONSUMER_GROUP
+              valueFrom:
+                configMapKeyRef:
+                  name: notification-config
+                  key: KAFKA_CONSUMER_GROUP
+            - name: KAFKA_RETRIES
+              valueFrom:
+                configMapKeyRef:
+                  name: notification-config
+                  key: KAFKA_RETRIES
+          # SMTP config
+            - name: SMTP_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: notification-secrets
+                  key: SMTP_HOST
+            - name: SMTP_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: notification-config
+                  key: SMTP_PORT
+            - name: SMTP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: notification-secrets
+                  key: SMTP_USERNAME
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: notification-secrets
+                  key: SMTP_PASSWORD
+
+
+            - name: JWT_ACCESS_TOKEN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: edulearn-secrets
+                  key: JWT_ACCESS_TOKEN_SECRET
+            - name: JWT_TOKEN_EXPIRY
+              valueFrom:
+                secretKeyRef:
+                  name: edulearn-secrets
+                  key: JWT_ACCESS_TOKEN_EXPIRY
+            # Observability config
+            #Jaeger
+            - name: JAEGER_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_ENDPOINT
+            - name: JAEGER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_PORT
+            - name: JAEGER_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_HOST
+            - name: JAEGER_SAMPLING_RATE
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_SAMPLING_RATE
+            # Prometheus
+            - name: PROMETHEUS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: PROMETHEUS_PORT
+            # Logger
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: notification-config
+                  key: LOG_LEVEL
+            - name: LOG_FILE
+              valueFrom:
+                configMapKeyRef:
+                  name: notification-config
+                  key: LOG_FILE
+            - name: LOKI_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: LOKI_URL
+            - name: HEALTH_PORT
+              value: '8086'
+        
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+          # livenessProbe:
+          #   httpGet:
+          #     path: "/health"
+          #     port: 3000
+          #   initialDelaySeconds: 15
+          #   periodSeconds: 10
+          # readinessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 3000
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 5
+

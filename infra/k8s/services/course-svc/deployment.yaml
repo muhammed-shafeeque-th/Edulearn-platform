@@ -1,0 +1,181 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: course-service
+  namespace: edulearn
+  labels:
+    app: course-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: course-service
+  template:
+    metadata:
+      labels:
+        app: course-service
+    spec:
+      # serviceAccountName: edulearn-sa 
+      containers:
+        - name: course-service
+          image: edulearn-course:latest
+          ports:
+            - containerPort: 50053
+          env:
+            - name: NODE_ENV
+              value: "development"
+            - name: SERVICE_NAME
+              value: "course-service"
+            - name: SERVICE_VERSION
+              value: "0.0.1"
+            - name: API_PORT
+              value: '3003'
+            - name: GRPC_PORT
+              value: '50053'
+
+            # Services url
+            - name: COURSE_SERVICE_GRPC
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: COURSE_SERVICE_GRPC
+            - name: USER_SERVICE_GRPC
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: USER_SERVICE_GRPC
+            # DB configs
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: course-secrets
+                  key: DATABASE_URL
+            - name: DATABASE_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: course-config
+                  key: DATABASE_PORT
+            - name: DATABASE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: course-config
+                  key: DATABASE_NAME
+            - name: DATABASE_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: course-config
+                  key: DATABASE_HOST
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: course-secrets
+                  key: DATABASE_USERNAME
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: course-secrets
+                  key: DATABASE_PASSWORD
+            # REDIS configs
+            - name: REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: REDIS_URL
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: REDIS_HOST
+            - name: REDIS_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: course-config
+                  key: REDIS_DB
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: REDIS_PORT
+            - name: REDIS_KEY_PREFIX
+              valueFrom:
+                configMapKeyRef:
+                  name: course-config
+                  key: REDIS_KEY_PREFIX
+
+            # Kafka configs
+            - name: KAFKA_BROKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: KAFKA_BROKERS
+            - name: KAFKA_CLIENT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: course-config
+                  key: KAFKA_CLIENT_ID
+            - name: KAFKA_CONSUMER_GROUP
+              valueFrom:
+                configMapKeyRef:
+                  name: course-config
+                  key: KAFKA_CONSUMER_GROUP
+
+            # Observability config
+            #Jaeger
+            - name: JAEGER_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_ENDPOINT
+            - name: JAEGER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_PORT
+            - name: JAEGER_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_HOST
+            - name: JAEGER_SAMPLING_RATE
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: JAEGER_SAMPLING_RATE
+            # Prometheus
+            - name: PROMETHEUS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: PROMETHEUS_PORT
+            # Logger
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: course-config
+                  key: LOG_LEVEL
+            - name: LOKI_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: edulearn-config
+                  key: LOKI_URL
+        
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+          # livenessProbe:
+          #   httpGet:
+          #     path: "/health"
+          #     port: 3000
+          #   initialDelaySeconds: 15
+          #   periodSeconds: 10
+          # readinessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 3000
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 5
+
