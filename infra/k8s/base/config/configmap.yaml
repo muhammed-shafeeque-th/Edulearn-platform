@@ -1,0 +1,67 @@
+# Non-sensitive configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: edulearn-config
+  namespace: edulearn
+  labels:
+    app: payment-service
+data:
+  REDIS_URL: redis://redis:6379
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  REDIS_LAZY_CONNECT: "true"
+  REDIS_DB: "0"
+  REDIS_MAX_CONNECTIONS: "100"
+  REDIS_MIN_CONNECTIONS: "10"
+  REDIS_TTL: "3600"
+
+  AUTH_SERVICE_GRPC: auth-svc:50051
+  USER_SERVICE_GRPC: user-svc:50052
+  COURSE_SERVICE_GRPC: course-svc:50053
+  SESSION_SERVICE_GRPC: session-svc:50057
+  NOTIFICATION_SERVICE_GRPC: notification-svc:50056
+  PAYMENT_SERVICE_GRPC: payment-svc:50055
+  ORDER_SERVICE_GRPC: order-svc:50054
+  ANALYTICS_SERVICE_GRPC: localhost:50058
+  CHAT_SERVICE_GRPC: chat-svc:50059
+
+  # CORS CONFIGURATION
+  ALLOWED_ORIGINS: https://edulearn-client.vercel.app,http://localhost:9000,
+  ALLOWED_METHODS: GET,POST,PUT,DELETE,PATCH,OPTIONS
+
+  # gRPC Client Configuration
+  GRPC_TIMEOUT: "30000"
+  GRPC_MAX_RECEIVE_MESSAGE_LENGTH: "4194304"
+  GRPC_MAX_SEND_MESSAGE_LENGTH: "4194304"
+  GRPC_KEEPALIVE_TIME: "30000"
+  GRPC_KEEPALIVE_TIMEOUT: "5000"
+  GRPC_KEEPALIVE_PERMIT_WITHOUT_CALLS: "true"
+
+  KAFKA_BROKERS: kafka:9092
+  KAFKA_SSL: "false"
+  KAFKA_SASL_USERNAME: ""
+  KAFKA_SASL_PASSWORD: ""
+  KAFKA_SASL_MECHANISM: PLAIN
+  KAFKA_CONSUMER_GROUP: api-gateway-group
+  KAFKA_PRODUCER_ACKS: all
+  KAFKA_PRODUCER_RETRIES: "3"
+  KAFKA_PRODUCER_BATCH_SIZE: "16384"
+  KAFKA_PRODUCER_LINGER_MS: "5"
+
+  # Loki Logging
+  LOKI_URL: http://loki:3100
+  LOKI_USERNAME: ""
+  LOKI_PASSWORD: ""
+
+  # Jaeger Tracing
+  JAEGER_ENDPOINT: http://jaeger:4318
+  JAEGER_HOST: jaeger
+  JAEGER_PORT: "6831"
+  JAEGER_SAMPLING_RATE: "0.1"
+  JAEGER_SAMPLING_TYPE: probabilistic
+
+  # Prometheus Metrics
+  PROMETHEUS_PORT: "9090"
+  PROMETHEUS_PATH: /metrics
+  METRICS_ENABLED: "true"
