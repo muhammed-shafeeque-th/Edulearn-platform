@@ -63,6 +63,10 @@ module "eks" {
     coredns    = { most_recent = true }
     kube-proxy = { most_recent = true }
     vpc-cni    = { most_recent = true }
+    eks-pod-identity-agent = {
+      before_compute = true
+    }
+
     aws-ebs-csi-driver = {
       most_recent              = true
       service_account_role_arn = module.ebs_csi_irsa_role.iam_role_arn
@@ -79,7 +83,7 @@ module "eks" {
       max_size                   = 10
       desired_size               = 4
       instance_types             = ["c7i-flex.large"]
-      capacity_type              = "ON_DEMAND"
+      capacity_type              = "SPOT"
       disk_size                  = 35
       use_custom_launch_template = false # Important to apply disk size!
 
