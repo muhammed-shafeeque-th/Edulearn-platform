@@ -1,0 +1,171 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: edulearn
+  labels:
+    app: payment-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9091"
+    spec:
+      containers:
+        - name: payment-service
+          image: payment-service:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: grpc
+              containerPort: 50051
+              protocol: TCP
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+            - name: metrics
+              containerPort: 9091
+              protocol: TCP
+          env:
+            - name: API_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: payment-service-config
+                  key: API_PORT
+            - name: GRPC_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: payment-service-config
+                  key: GRPC_PORT
+            - name: PROMETHEUS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: payment-service-config
+                  key: PROMETHEUS_PORT
+            - name: KAFKA_CLIENT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: payment-service-config
+                  key: KAFKA_CLIENT_ID
+            - name: KAFKA_CONSUMER_GROUP
+              valueFrom:
+                configMapKeyRef:
+                  name: payment-service-config
+                  key: KAFKA_CONSUMER_GROUP
+            - name: KAFKA_MAX_POLL_RECORDS
+              valueFrom:
+                configMapKeyRef:
+                  name: payment-service-config
+                  key: KAFKA_MAX_POLL_RECORDS
+            - name: KAFKA_FETCH_MAX_BYTES
+              valueFrom:
+                configMapKeyRef:
+                  name: payment-service-config
+                  key: KAFKA_FETCH_MAX_BYTES
+            - name: DATABASE_MAX_CONNECTIONS
+              valueFrom:
+                configMapKeyRef:
+                  name: payment-service-config
+                  key: DATABASE_MAX_CONNECTIONS
+            - name: DATABASE_MIN_CONNECTIONS
+              valueFrom:
+                configMapKeyRef:
+                  name: payment-service-config
+                  key: DATABASE_MIN_CONNECTIONS
+            - name: REDIS_MIN_CONNECTIONS
+              valueFrom:
+                configMapKeyRef:
+                  name: payment-service-config
+                  key: REDIS_MIN_CONNECTIONS
+            - name: REDIS_MAX_CONNECTIONS
+              valueFrom:
+                configMapKeyRef:
+                  name: payment-service-config
+                  key: REDIS_MAX_CONNECTIONS
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: payment-service-config
+                  key: LOG_LEVEL
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: payment-service-secret
+                  key: DATABASE_URL
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: payment-service-secret
+                  key: REDIS_URL
+            - name: KAFKA_BROKER
+              valueFrom:
+                secretKeyRef:
+                  name: payment-service-secret
+                  key: KAFKA_BROKER
+            - name: STRIPE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: payment-service-secret
+                  key: STRIPE_API_KEY
+            - name: STRIPE_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: payment-service-secret
+                  key: STRIPE_WEBHOOK_SECRET
+            - name: PAYPAL_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: payment-service-secret
+                  key: PAYPAL_CLIENT_ID
+            - name: PAYPAL_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: payment-service-secret
+                  key: PAYPAL_SECRET
+            - name: PAYPAL_WEBHOOK_ID
+              valueFrom:
+                secretKeyRef:
+                  name: payment-service-secret
+                  key: PAYPAL_WEBHOOK_ID
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: payment-service-secret
+                  key: JWT_SECRET
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 30
