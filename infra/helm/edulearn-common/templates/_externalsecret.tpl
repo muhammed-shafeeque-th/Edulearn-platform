@@ -1,47 +1,41 @@
-{{- define "edulearn.externalsecret" -}}
-
-{{- if .Values.externalsecret.enabled }}
-
+{{- define "edulearn-common.externalsecret" -}}
+{{- if .Values.externalSecret.enabled }}
+---
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
-
 metadata:
-  name: {{ .Values.externalsecret.targetSecretName }}
-
+  name: {{ include "edulearn-common.fullname" . }}-secrets
+  labels:
+    {{- include "edulearn-common.labels" . | nindent 4 }}
+  {{- if .Values.externalSecret.annotations }}
+  annotations:
+    {{- toYaml .Values.externalSecret.annotations | nindent 4 }}
+  {{- end }}
 spec:
-
-  refreshInterval:
-    {{ .Values.externalsecret.refreshInterval }}
+  refreshInterval: {{ .Values.externalSecret.refreshInterval | default "5m" }}
 
   secretStoreRef:
-    name:
-      {{ .Values.externalsecret.secretStore.name }}
-
-    kind:
-      {{ .Values.externalsecret.secretStore.kind }}
+    name: {{ .Values.externalSecret.secretStore.name | default "aws-secrets-manager" }}
+    kind: {{ .Values.externalSecret.secretStore.kind | default "ClusterSecretStore" }}
 
   target:
-    name:
-      {{ .Values.externalsecret.targetSecretName }}
+    name: {{ .Values.externalSecret.targetSecretName | default (include "edulearn-common.fullname" .) }}-secrets
+    creationPolicy: {{ .Values.externalSecret.target.creationPolicy | default "Owner" }}
 
-    creationPolicy: Owner
-
+  {{- if .Values.externalSecret.dataFrom }}
+  dataFrom:
+    {{- toYaml .Values.externalSecret.dataFrom | nindent 4 }}
+  {{- else if .Values.externalSecret.data }}
   data:
-
-  {{- range .Values.externalsecret.data }}
-
-    - secretKey:
-        {{ .secretKey }}
-
+    {{- range .Values.externalSecret.data }}
+    - secretKey: {{ .secretKey }}
       remoteRef:
-        key:
-          {{ .remoteKey }}
-
-        property:
-          {{ .property }}
-
+        key: {{ .remoteKey }}
+        {{- if .property }}
+        property: {{ .property }}
+        {{- end }}
+    {{- end }}
   {{- end }}
 
 {{- end }}
-
 {{- end }}
