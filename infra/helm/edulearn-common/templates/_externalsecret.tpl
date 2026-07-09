@@ -15,12 +15,12 @@ spec:
   refreshInterval: {{ .Values.externalSecret.refreshInterval | default "5m" }}
 
   secretStoreRef:
-    name: {{ .Values.externalSecret.secretStore.name | default "aws-secrets-manager" }}
-    kind: {{ .Values.externalSecret.secretStore.kind | default "ClusterSecretStore" }}
+    name: {{ .Values.externalSecret.secretStoreRef.name | default "aws-secrets-manager" }}
+    kind: {{ .Values.externalSecret.secretStoreRef.kind | default "ClusterSecretStore" }}
 
   target:
     name: {{ .Values.externalSecret.targetSecretName | default (include "edulearn-common.fullname" .) }}-secrets
-    creationPolicy: {{ .Values.externalSecret.target.creationPolicy | default "Owner" }}
+    creationPolicy: {{ .Values.externalSecret.targetCreationPolicy | default "Owner" }}
 
   {{- if .Values.externalSecret.dataFrom }}
   dataFrom:
