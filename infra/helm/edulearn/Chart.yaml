@@ -73,16 +73,16 @@ dependencies:
 
   # Infrastructure / Stateful Services
   - name: redis
-    version: 1.0.2
+    version: 1.0.0
     repository: file://../charts/redis
     condition: redis.enabled
 
   - name: kafka
-    version: 1.0.2
+    version: 1.0.0
     repository: file://../charts/kafka
     condition: kafka.enabled
 
   - name: postgres
-    version: 1.0.2
+    version: 1.0.0
     repository: file://../charts/postgres
     condition: postgres.enabled

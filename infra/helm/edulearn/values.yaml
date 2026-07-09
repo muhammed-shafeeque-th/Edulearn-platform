@@ -618,6 +618,7 @@ payment:
     enabled: true
     refreshInterval: 5m
     targetSecretName: edulearn-payment-secret
+    targetCreationPolicy: "Owner"
 
     secretStoreRef:
       name: aws-secrets-manager
