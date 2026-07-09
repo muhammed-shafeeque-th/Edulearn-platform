@@ -19,5 +19,5 @@ spec:
     sectionName: https
   rules:
   - backendRefs:
-    - name: edulearn-gateway
-      port: 80
+    - name: edulearn-app-gateway
+      port: 4000
