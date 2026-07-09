@@ -1149,7 +1149,7 @@ chat:
 externalSecret:
     enabled: true
     refreshInterval: 5m
-    targetSecretName: edulearn-secret
+    targetSecretName: edulearn
     secretStoreRef:
       name: aws-secrets-manager
       kind: ClusterSecretStore
