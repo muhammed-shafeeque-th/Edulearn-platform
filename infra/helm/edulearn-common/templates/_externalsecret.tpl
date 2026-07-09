@@ -4,7 +4,7 @@
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
-  name: {{ include "edulearn-common.fullname" . }}-secrets
+  name: {{ include "edulearn-common.fullname" . }}-secret
   labels:
     {{- include "edulearn-common.labels" . | nindent 4 }}
   {{- if .Values.externalSecret.annotations }}
@@ -19,7 +19,7 @@ spec:
     kind: {{ .Values.externalSecret.secretStoreRef.kind | default "ClusterSecretStore" }}
 
   target:
-    name: {{ .Values.externalSecret.targetSecretName | default (include "edulearn-common.fullname" .) }}-secrets
+    name: {{ .Values.externalSecret.targetSecretName | default (include "edulearn-common.fullname" .) }}-secret
     creationPolicy: {{ .Values.externalSecret.targetCreationPolicy | default "Owner" }}
 
   {{- if .Values.externalSecret.dataFrom }}

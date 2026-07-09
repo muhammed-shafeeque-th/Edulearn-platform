@@ -65,7 +65,7 @@ api-gateway:
   externalSecret:
     enabled: true
     refreshInterval: 5m
-    targetSecretName: edulearn-api-gateway-secret
+    targetSecretName: edulearn-api-secret
 
     secretStoreRef:
       name: aws-secrets-manager
@@ -177,7 +177,7 @@ auth:
   externalSecret:
     enabled: true
     refreshInterval: 5m
-    targetSecretName: edulearn-auth-secret
+    targetSecretName: edulearn-auth
 
     secretStoreRef:
       name: aws-secrets-manager
@@ -309,7 +309,7 @@ user:
   externalSecret:
     enabled: true
     refreshInterval: 5m
-    targetSecretName: edulearn-user-secret
+    targetSecretName: edulearn-user
 
     secretStoreRef:
       name: aws-secrets-manager
@@ -461,7 +461,7 @@ course:
   externalSecret:
     enabled: true
     refreshInterval: 5m
-    targetSecretName: edulearn-course-secret
+    targetSecretName: edulearn-course
 
     secretStoreRef:
       name: aws-secrets-manager
@@ -617,7 +617,7 @@ payment:
   externalSecret:
     enabled: true
     refreshInterval: 5m
-    targetSecretName: edulearn-payment-secret
+    targetSecretName: edulearn-payment
     targetCreationPolicy: "Owner"
 
     secretStoreRef:
@@ -776,7 +776,7 @@ notification:
   externalSecret:
     enabled: true
     refreshInterval: 5m
-    targetSecretName: edulearn-notification-secret
+    targetSecretName: edulearn-notification
 
     secretStoreRef:
       name: aws-secrets-manager
@@ -929,7 +929,7 @@ order:
   externalSecret:
     enabled: true
     refreshInterval: 5m
-    targetSecretName: edulearn-order-secret
+    targetSecretName: edulearn-order
 
     secretStoreRef:
       name: aws-secrets-manager
@@ -1068,7 +1068,7 @@ chat:
   externalSecret:
     enabled: true
     refreshInterval: 5m
-    targetSecretName: edulearn-chat-secret
+    targetSecretName: edulearn-chat
 
     secretStoreRef:
       name: aws-secrets-manager
@@ -1150,7 +1150,6 @@ externalSecret:
     enabled: true
     refreshInterval: 5m
     targetSecretName: edulearn-secret
-
     secretStoreRef:
       name: aws-secrets-manager
       kind: ClusterSecretStore
