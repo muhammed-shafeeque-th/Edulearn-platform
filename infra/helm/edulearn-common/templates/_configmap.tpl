@@ -6,9 +6,9 @@ metadata:
   labels:
     {{- include "edulearn-common.labels" . | nindent 4 }}
 data:
-{{- if .Values.configData }}
-{{- range $key, $value := .Values.configData }}
+  {{- if .Values.configData }}
+  {{- range $key, $value := .Values.configData }}
   {{ $key }}: {{ $value | quote }}
-{{- end }}
-{{- end }}
+  {{- end }}
+  {{- end }}
 {{- end }}

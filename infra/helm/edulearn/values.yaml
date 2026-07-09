@@ -1,56 +1,1245 @@
-# Global settings
 global:
-  domain: edulearn
+  configMaps:
+    - edulearn-config
 
-# Enable/Disable components
+  secretRefs:
+    - edulearn-secret
+
+nameOverride: edulearn
+
 api-gateway:
   enabled: true
+  nameOverride: api-gateway
+
+  replicaCount: 2
+
+  image:
+    repository: ghcr.io/muhammed-shafeeque-th/edulearn/gateway
+    pullPolicy: IfNotPresent
+    tag: "v1.0.5"
+
+  service:
+    type: ClusterIP
+    port: 4000
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+
+  livenessProbe: null
+  #   httpGet:
+  #     path: /health
+  #     port: 4000 # http
+  #   initialDelaySeconds: 30
+  #   periodSeconds: 10
+
+  readinessProbe: null
+  #   httpGet:
+  #     path: /health
+  #     port: 4000 # http
+  #   initialDelaySeconds: 5
+  #   periodSeconds: 5
+
+  env:
+    NODE_ENV: "development"
+    PORT: "4000"
+    SERVICE_NAME: api-gateway
+    serviceVersion: "0.0.1"
+
+  configMaps:
+    - edulearn-api-gateway-config
+
+  secretRefs:
+    - edulearn-api-gateway-secret
+  
+  externalSecret:
+    enabled: true
+    refreshInterval: 5m
+    targetSecretName: edulearn-api-gateway-secret
+
+    secretStoreRef:
+      name: aws-secrets-manager
+      kind: ClusterSecretStore
+
+    dataFrom:
+      - extract:
+          key: edulearn/prod/api-gateway
+
+  configData:
+    # OpenTelemetry Jaeger Tracing
+    JAEGER_HOST: jaeger
+    JAEGER_PORT: "6831"
+    JAEGER_ENDPOINT: http://jaeger:4318
+    JAEGER_SAMPLING_RATE: "0.1"
+    JAEGER_SAMPLING_TYPE: probabilistic
+
+    # Prometheus Metrics
+    PROMETHEUS_PORT: "9091"
+    PROMETHEUS_PATH: /metrics
+    METRICS_ENABLED: "true"
+
+    # Loki Logging
+    LOKI_URL: http://loki:3100
+    LOKI_USERNAME: ""
+    LOKI_PASSWORD: ""
+
+    # Logging Configuration
+    LOG_LEVEL: debug
+    LOG_FORMAT: json
+    LOG_FILE: logs/gateway-service.log
+    LOG_OUTPUT: stdout
+    LOG_MAX_SIZE: 100m
+    LOG_MAX_FILES: "5"
+    LOG_COMPRESS: "true"
+
+    # Tracing Configuration
+    TRACING_ENABLED: "true"
+    TRACING_SAMPLING_RATE: "0.1"
+    TRACING_SERVICE_NAME: gateway-service
+  
+
+  secretData: {}
+  configMounts: []
 
 auth:
   enabled: true
+  nameOverride: auth
+
+  replicaCount: 1
+
+  image:
+    repository: ghcr.io/muhammed-shafeeque-th/edulearn/auth
+    pullPolicy: IfNotPresent
+    tag: "v1.0.5"
+
+  service:
+    type: ClusterIP
+    port: 50051
+    ports:
+      - name: http
+        port: 3001
+        targetPort: 3001
+      - name: grpc
+        port: 50051
+        targetPort: 50051
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+
+  livenessProbe: null
+  #   httpGet:
+  #     path: /health
+  #     port: 8086 # http
+  #   initialDelaySeconds: 30
+  #   periodSeconds: 10
+
+  readinessProbe: null
+  #   httpGet:
+  #     path: /health
+  #     port: 8086 # http
+  #   initialDelaySeconds: 5
+  #   periodSeconds: 5
+
+  env:
+    NODE_ENV: "development"
+    SERVICE_NAME: auth-service
+    serviceVersion: "0.0.1"
+    API_PORT: 3002
+    GRPC_PORT: 50051
+
+  configMaps:
+    - edulearn-auth-config
+
+  secretRefs:
+    - edulearn-auth-secret
+
+  externalSecret:
+    enabled: true
+    refreshInterval: 5m
+    targetSecretName: edulearn-auth-secret
+
+    secretStoreRef:
+      name: aws-secrets-manager
+      kind: ClusterSecretStore
+
+    dataFrom:
+      - extract:
+          key: edulearn/prod/auth
+
+  configData:
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: "5432"
+    POSTGRES_DB: auth_service
+    POSTGRES_USER: postgres
+    POSTGRES_SSL_MODE: disable
+    DB_MAX_OPEN_CONNS: "25"
+    DB_MAX_IDLE_CONNS: "5"
+
+    # TEMPLATE CONFIG
+    TEMPLATE_BASE_DIR: dist/shared/templates
+    COMPANY_NAME: EduLearn
+    COMPANY_ADDRESS: EduLearn Inc., 456 Learning Avenue, San Francisco, CA 94102
+    SUPPORT_EMAIL: support@edulearn.com
+    BASE_URL: https://edulearn.com
+
+    # Social Links
+    TWITTER_URL: https://twitter.com/edulearn
+    FACEBOOK_URL: https://facebook.com/edulearn
+    LINKEDIN_URL: https://linkedin.com/company/edulearn
+    INSTAGRAM_URL: https://instagram.com/edulearn
+    YOUTUBE_URL: https://youtube.com/@edulearn
+
+    # REDIS CONFIGURATION
+    REDIS_DB: "1"
+    REDIS_MAX_CONNECTIONS: "100"
+    REDIS_MIN_CONNECTIONS: "10"
+    REDIS_TTL_DEFAULT: "86400"
+    REDIS_KEY_PREFIX: "edulearn:auth:"
+
+    # gRPC CONFIGURATION
+    GRPC_PORT: "50052"
+    GRPC_MAX_CONCURRENT_STREAMS: "100"
+    GRPC_MAX_CONNECTION_IDLE: 15s
+    GRPC_MAX_CONNECTION_AGE_GRACE: 5s
+
+    # KAFKA CONFIGURATION
+    KAFKA_CLIENT_ID: auth-service
+    KAFKA_CONSUMER_GROUP: auth-service-group
+    KAFKA_MAX_POLL_RECORDS: "100"
+    KAFKA_FETCH_MAX_BYTES: "5242880"
+    KAFKA_SASL_ENABLED: "false"
+
+    # HEALTH CHECK CONFIGURATION
+    HEALTH_PORT: "8086"
+    HEALTH_PATH: /health
+    READINESS_PORT: "8086"
+    READINESS_PATH: /ready
+    LIVENESS_PORT: "8086"
+    LIVENESS_PATH: /live
+  
+
+  secretData: {}
+
+  configMounts: []
 
 user:
   enabled: true
+  nameOverride: user
+
+  replicaCount: 1
+
+  image:
+    repository: ghcr.io/muhammed-shafeeque-th/edulearn/user
+    pullPolicy: IfNotPresent
+    tag: "v1.0.5"
+
+  service:
+    type: ClusterIP
+    port: 50052
+    ports:
+      - name: grpc
+        port: 50052
+        targetPort: 50052
+      - name: http
+        port: 3002
+        targetPort: 3002
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+
+  livenessProbe: null
+  #   httpGet:
+  #     path: /health
+  #     port: 8085 # http
+  #   initialDelaySeconds: 30
+  #   periodSeconds: 10
+
+  readinessProbe: null
+  #   httpGet:
+  #     path: /health
+  #     port: 8085 # http
+  #   initialDelaySeconds: 5
+  #   periodSeconds: 5
+
+  env:
+    NODE_ENV: "development"
+    SERVICE_NAME: user-service
+    SERVICE_VERSION: "0.0.1"
+    API_PORT: 3002
+    GRPC_PORT: 50052
+
+  configMaps:
+    - edulearn-user-config
+
+  secretRefs:
+    - edulearn-user-secret
+
+  externalSecret:
+    enabled: true
+    refreshInterval: 5m
+    targetSecretName: edulearn-user-secret
+
+    secretStoreRef:
+      name: aws-secrets-manager
+      kind: ClusterSecretStore
+
+    dataFrom:
+      - extract:
+          key: edulearn/prod/user
+
+  configData:
+    DATABASE_HOST: postgres
+    DATABASE_PORT: "5432"
+    DATABASE_NAME: user_service
+    DATABASE_SSL_MODE: disable
+    DB_MAX_OPEN_CONNS: "25"
+    DB_MAX_IDLE_CONNS: "5"
+    DB_CONN_MAX_LIFETIME: 5m
+    DB_CONN_MAX_IDLE_TIME: 5m
+
+    # REDIS CONFIGURATION
+    REDIS_DB: "0"
+    REDIS_MAX_CONNECTIONS: "100"
+    REDIS_MIN_CONNECTIONS: "10"
+    REDIS_TTL_DEFAULT: "86400"
+    REDIS_KEY_PREFIX: "edulearn:user:"
+
+    # KAFKA CONFIGURATION
+    KAFKA_CLIENT_ID: user-service
+    KAFKA_CONSUMER_GROUP: user-service-group
+    KAFKA_MAX_POLL_RECORDS: "100"
+    KAFKA_FETCH_MAX_BYTES: "5242880"
+    KAFKA_SASL_ENABLED: "false"
+
+    # gRPC CONFIGURATION
+    GRPC_PORT: "50052"
+    GRPC_MAX_CONCURRENT_STREAMS: "100"
+    GRPC_MAX_CONNECTION_IDLE: 15s
+    GRPC_MAX_CONNECTION_AGE: 30s
+    GRPC_MAX_CONNECTION_AGE_GRACE: 5s
+    GRPC_TIME: 2h
+    GRPC_TIMEOUT: 20s
+
+    # OpenTelemetry Jaeger Tracing
+    JAEGER_HOST: jaeger
+    JAEGER_PORT: "6831"
+    JAEGER_ENDPOINT: http://jaeger:4318
+    JAEGER_SAMPLING_RATE: "0.1"
+    JAEGER_SAMPLING_TYPE: probabilistic
+
+    # Prometheus Metrics
+    PROMETHEUS_PORT: "9091"
+    PROMETHEUS_PATH: /metrics
+    METRICS_ENABLED: "true"
+
+    # Loki Logging
+    LOKI_URL: http://loki:3100
+    LOKI_USERNAME: ""
+    LOKI_PASSWORD: ""
+
+    # Logging Configuration
+    LOG_LEVEL: debug
+    LOG_FORMAT: json
+    LOG_FILE: logs/user-service.log
+    LOG_OUTPUT: stdout
+    LOG_MAX_SIZE: 100m
+    LOG_MAX_FILES: "5"
+    LOG_COMPRESS: "true"
+
+    # Tracing Configuration
+    TRACING_ENABLED: "true"
+    TRACING_SAMPLING_RATE: "0.1"
+    TRACING_SERVICE_NAME: user-service
+
+    # HEALTH CHECK CONFIGURATION
+    HEALTH_PORT: "8082"
+    HEALTH_PATH: /health
+    READINESS_PORT: "8082"
+    READINESS_PATH: /ready
+    LIVENESS_PORT: "8082"
+    LIVENESS_PATH: /live
+
+  secretData: {}
+
+  configMounts: []
 
 course:
   enabled: true
+  nameOverride: course
+
+  replicaCount: 1
+
+  image:
+    repository: ghcr.io/muhammed-shafeeque-th/edulearn/course
+    pullPolicy: IfNotPresent
+    tag: "v1.0.5"
+
+  service:
+    type: ClusterIP
+    port: 50053
+    ports:
+      - name: http
+        port: 3003
+        targetPort: 3003
+      - name: grpc
+        port: 50053
+        targetPort: 50053
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+
+  livenessProbe: null
+  #   httpGet:
+  #     path: /health
+  #     port: 8083 # http
+  #   initialDelaySeconds: 30
+  #   periodSeconds: 10
+
+  readinessProbe: null
+  #   httpGet:
+  #     path: /health
+  #     port: 8083 # http
+  #   initialDelaySeconds: 5
+  #   periodSeconds: 5
+
+  env:
+    NODE_ENV: "development"
+    SERVICE_NAME: course-service
+    serviceVersion: "0.0.1"
+    API_PORT: 3003
+    GRPC_PORT: 50053
+
+  configMaps:
+    - edulearn-course-config
+
+  secretRefs:
+    - edulearn-course-secret
+    
+  externalSecret:
+    enabled: true
+    refreshInterval: 5m
+    targetSecretName: edulearn-course-secret
+
+    secretStoreRef:
+      name: aws-secrets-manager
+      kind: ClusterSecretStore
+
+    dataFrom:
+      - extract:
+          key: edulearn/prod/course
+
+  configData:
+    DATABASE_HOST: "postgres"
+    DATABASE_PORT: "5432"
+    DATABASE_NAME: course_service
+    DATABASE_MAX_CONNECTIONS: "50"
+    DATABASE_MIN_CONNECTIONS: "10"
+    DATABASE_CONNECTION_TIMEOUT: "30000"
+    DATABASE_IDLE_TIMEOUT: "10000"
+
+    # KAFKA CONFIGURATION
+    KAFKA_CLIENT_ID: course-service
+    KAFKA_CONSUMER_GROUP: course-service-group
+    KAFKA_MAX_POLL_RECORDS: "100"
+    KAFKA_FETCH_MAX_BYTES: "5242880"
+    KAFKA_SASL_ENABLED: "false"
+
+    # REDIS CONFIGURATION
+    REDIS_DB: "4"
+    REDIS_MAX_CONNECTIONS: "100"
+    REDIS_MIN_CONNECTIONS: "10"
+    REDIS_TTL_DEFAULT: "86400"
+    REDIS_KEY_PREFIX: "edulearn:course:"
+
+    # gRPC CONFIGURATION
+    GRPC_PORT: "50053"
+    GRPC_MAX_CONCURRENT_STREAMS: "100"
+    GRPC_MAX_CONNECTION_IDLE: 15s
+    GRPC_MAX_CONNECTION_AGE: 30s
+    GRPC_MAX_CONNECTION_AGE_GRACE: 5s
+    GRPC_TIME: 2h
+    GRPC_TIMEOUT: 20s
+
+    # OBSERVABILITY CONFIGURATION
+
+    # OpenTelemetry Jaeger Tracing
+    JAEGER_SAMPLING_RATE: "0.1"
+    JAEGER_SAMPLING_TYPE: probabilistic
+
+    # Prometheus Metrics
+    PROMETHEUS_PATH: /metrics
+    METRICS_ENABLED: "true"
+
+    # Logging Configuration
+    LOG_LEVEL: debug
+    LOG_FORMAT: json
+    LOG_FILE: logs/course-service.log
+    LOG_OUTPUT: stdout
+    LOG_MAX_SIZE: 100m
+    LOG_MAX_FILES: "5"
+    LOG_COMPRESS: "true"
+
+    # Tracing Configuration
+    TRACING_ENABLED: "true"
+    TRACING_SAMPLING_RATE: "0.1"
+    TRACING_SERVICE_NAME: course-service
+
+    #OTP_TEMPLATE_PATH=app\internal\shared\template\activation-mail.html
+
+    # HEALTH CHECK CONFIGURATION
+    HEALTH_PORT: "8083"
+    HEALTH_PATH: /health
+    READINESS_PORT: "8083"
+    READINESS_PATH: /ready
+    LIVENESS_PORT: "8083"
+    LIVENESS_PATH: /live
+
+  secretData: {}
+
+  configMounts: []
 
 payment:
   enabled: true
+  nameOverride: payment
 
-order:
-  enabled: true
+  replicaCount: 1
+
+  image:
+    repository: ghcr.io/muhammed-shafeeque-th/edulearn/payment
+    pullPolicy: IfNotPresent
+    tag: "v1.0.5"
+
+  service:
+    type: ClusterIP
+    port: 50055
+    ports:
+      - name: grpc
+        port: 50055
+        targetPort: 50055
+        protocol: TCP
+      - name: webhook
+        port: 4005
+        targetPort: 4005
+        protocol: TCP
+      - name: http
+        port: 3000
+        targetPort: 3000
+        protocol: TCP
+      - name: metrics
+        port: 9091
+        targetPort: 9091
+        protocol: TCP
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+
+  livenessProbe: null
+  #   httpGet:
+  #     path: /health
+  #     port: 8085 # http
+  #   initialDelaySeconds: 30
+  #   periodSeconds: 10
+
+  readinessProbe: null
+  #   httpGet:
+  #     path: /health
+  #     port: 8085 # http
+  #   initialDelaySeconds: 5
+  #   periodSeconds: 5
+
+  env:
+    NODE_ENV: "development"
+    SERVICE_NAME: payment-service
+    SERVICE_VERSION: "0.0.1"
+    API_PORT: 4005
+    GRPC_PORT: 50055
+
+  configMaps:
+    - edulearn-payment-config
+
+  secretRefs:
+    - edulearn-payment-secret
+  
+  externalSecret:
+    enabled: true
+    refreshInterval: 5m
+    targetSecretName: edulearn-payment-secret
+    targetCreationPolicy: "Owner"
+
+    secretStoreRef:
+      name: aws-secrets-manager
+      kind: ClusterSecretStore
+
+    dataFrom:
+      - extract:
+          key: edulearn/prod/payment
+
+  configData:
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: "5432"
+    POSTGRES_DB: payment_service
+    POSTGRES_SSL_MODE: disable
+    DB_MAX_OPEN_CONNS: "25"
+    DB_MAX_IDLE_CONNS: "5"
+    DB_CONN_MAX_LIFETIME: 5m
+    DB_CONN_MAX_IDLE_TIME: 5m
+
+    # KAFKA CONFIGURATION
+    KAFKA_CLIENT_ID: payment-service
+    KAFKA_CONSUMER_GROUP: payment-service-group
+    KAFKA_MAX_POLL_RECORDS: "100"
+    KAFKA_FETCH_MAX_BYTES: "5242880"
+    KAFKA_SASL_ENABLED: "false"
+
+    # Redis
+    REDIS_DB: "7"
+    REDIS_MAX_CONNECTIONS: "100"
+    REDIS_MIN_CONNECTIONS: "10"
+    REDIS_TTL: "3600"
+    REDIS_KEY_PREFIX: "edulearn:payment:"
+
+    # gRPC CONFIGURATION
+    GRPC_PORT: "50056"
+    GRPC_MAX_CONCURRENT_STREAMS: "100"
+    GRPC_MAX_CONNECTION_IDLE: 15s
+    GRPC_MAX_CONNECTION_AGE: 30s
+    GRPC_MAX_CONNECTION_AGE_GRACE: 5s
+    GRPC_TIME: 2h
+    GRPC_TIMEOUT: 20s
+
+    # OpenTelemetry Jaeger Tracing
+    JAEGER_HOST: jaeger
+    JAEGER_PORT: "6831"
+    JAEGER_ENDPOINT: http://jaeger:4318
+    JAEGER_SAMPLING_RATE: "0.1"
+    JAEGER_SAMPLING_TYPE: probabilistic
+
+    # Prometheus Metrics
+    PROMETHEUS_PORT: "9091"
+    PROMETHEUS_PATH: /metrics
+    METRICS_ENABLED: "true"
+
+    # Loki Logging
+    LOKI_URL: http://loki:3100
+    LOKI_paymentNAME: ""
+    LOKI_PASSWORD: ""
+
+    # Logging Configuration
+    LOG_LEVEL: debug
+    LOG_FORMAT: json
+    LOG_FILE: logs/payment-service.log
+    LOG_OUTPUT: stdout
+    LOG_MAX_SIZE: 100m
+    LOG_MAX_FILES: "5"
+    LOG_COMPRESS: "true"
+
+    # Tracing Configuration
+    TRACING_ENABLED: "true"
+    TRACING_SAMPLING_RATE: "0.1"
+    TRACING_SERVICE_NAME: payment-service
+
+    #OTP_TEMPLATE_PATH=app\internal\shared\template\activation-mail.html
+
+    # HEALTH CHECK CONFIGURATION
+    HEALTH_PORT: "8085"
+    HEALTH_PATH: /health
+    READINESS_PORT: "8085"
+    READINESS_PATH: /ready
+    LIVENESS_PORT: "8085"
+    LIVENESS_PATH: /live
+
+  secretData: {}
+
+  configMounts: []
 
 notification:
   enabled: true
+  nameOverride: notification
+
+  replicaCount: 1
+
+  image:
+    repository: ghcr.io/muhammed-shafeeque-th/edulearn/notification
+    pullPolicy: IfNotPresent
+    tag: "v1.0.5"
+
+  service:
+    type: ClusterIP
+    port: 50056
+    ports:
+      - name: health-port
+        port: 3006
+        targetPort: 3006
+      - name: grpc
+        port: 50056
+        targetPort: 50056
+      - name: websocket
+        port: 4001
+        targetPort: 4001
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+
+  livenessProbe: null
+  #   httpGet:
+  #     path: /health
+  #     port: 8086 # http
+  #   initialDelaySeconds: 30
+  #   periodSeconds: 10
+
+  readinessProbe: null
+  #   httpGet:
+  #     path: /health
+  #     port: 8086 # http
+  #   initialDelaySeconds: 5
+  #   periodSeconds: 5
+
+  env:
+    NODE_ENV: "development"
+    SERVICE_NAME: notification-service
+    serviceVersion: "0.0.1"
+    API_PORT: 3006
+    GRPC_PORT: 50056
+    WS_PORT: 4001
+
+  configMaps:
+    - edulearn-notification-config
+
+  secretRefs:
+    - edulearn-notification-secret
+  
+  externalSecret:
+    enabled: true
+    refreshInterval: 5m
+    targetSecretName: edulearn-notification-secret
+
+    secretStoreRef:
+      name: aws-secrets-manager
+      kind: ClusterSecretStore
+
+    dataFrom:
+      - extract:
+          key: edulearn/prod/notification
+
+  configData:
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: "5432"
+    POSTGRES_DB: notification_service
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: password
+    POSTGRES_SSL_MODE: disable
+    DB_MAX_OPEN_CONNS: "25"
+    DB_MAX_IDLE_CONNS: "5"
+    DB_CONN_MAX_LIFETIME: 5m
+    DB_CONN_MAX_IDLE_TIME: 5m
+
+    TEMPLATE_BASE_PATH: pkg/templates
+
+    # KAFKA CONFIGURATION
+    KAFKA_CONSUMER_GROUP: notification-service-group
+    KAFKA_WORKERS: "6"
+    KAFKA_RETRIES: "3"
+
+    # SMTP CONFIGURATION
+    SMTP_PORT: "587"
+    SMTP_TLS_ENABLED: "true"
+    SMTP_TLS_SKIP_VERIFY: "false"
+    SMTP_RATE_LIMIT_RPM: "60"
+    SMTP_RATE_LIMIT_BURST: "1"
+
+    # WEBSOCKET CONFIGURATION
+    WS_PORT: "4001"
+
+    # gRPC CONFIGURATION
+    GRPC_PORT: "50056"
+    GRPC_MAX_CONCURRENT_STREAMS: "100"
+    GRPC_MAX_CONNECTION_IDLE: 15s
+    GRPC_MAX_CONNECTION_AGE: 30s
+    GRPC_MAX_CONNECTION_AGE_GRACE: 5s
+    GRPC_TIME: 2h
+    GRPC_TIMEOUT: 20s
+
+    # OpenTelemetry Jaeger Tracing
+    JAEGER_SAMPLING_RATE: "0.1"
+    JAEGER_SAMPLING_TYPE: probabilistic
+
+    # Prometheus Metrics
+    PROMETHEUS_PORT: "9091"
+    PROMETHEUS_PATH: /metrics
+    METRICS_ENABLED: "true"
+
+    # Logging Configuration
+    LOG_LEVEL: debug
+    LOG_FORMAT: json
+    LOG_FILE: logs/notification-service.log
+    LOG_OUTPUT: stdout
+    LOG_MAX_SIZE: 100m
+    LOG_MAX_FILES: "5"
+    LOG_COMPRESS: "true"
+
+    # Tracing Configuration
+    TRACING_ENABLED: "true"
+    TRACING_SAMPLING_RATE: "0.1"
+    TRACING_SERVICE_NAME: notification-service
+
+    #OTP_TEMPLATE_PATH=app\internal\shared\template\activation-mail.html
+
+    # HEALTH CHECK CONFIGURATION
+    HEALTH_PORT: "8086"
+    HEALTH_PATH: /health
+    READINESS_PORT: "8086"
+    READINESS_PATH: /ready
+    LIVENESS_PORT: "8086"
+    LIVENESS_PATH: /live
+
+  secretData: {}
+  configMounts: []
+
+order:
+  enabled: true
+  nameOverride: order
+
+  replicaCount: 1
+
+  image:
+    repository: ghcr.io/muhammed-shafeeque-th/edulearn/order
+    pullPolicy: IfNotPresent
+    tag: "v1.0.5"
+
+  service:
+    type: ClusterIP
+    port: 50054
+    ports:
+      - name: http
+        port: 8000
+        targetPort: 8000
+      - name: grpc
+        port: 50054
+        targetPort: 50054
+      - name: health
+        port: 3004
+        targetPort: 3004
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+
+  livenessProbe: null
+  #   httpGet:
+  #     path: /health
+  #     port: 8080 # http
+  #   initialDelaySeconds: 30
+  #   periodSeconds: 10
+
+  readinessProbe: null
+  #   httpGet:
+  #     path: /health
+  #     port: 8080 # http
+  #   initialDelaySeconds: 5
+  #   periodSeconds: 5
+
+  env:
+    NODE_ENV: "development"
+    SERVICE_NAME: OrderService
+    serviceVersion: "0.0.1"
+    API_PORT: 3004
+    GRPC_PORT: 50054
+
+  configMaps:
+    - edulearn-order-config
+
+  secretRefs:
+    - edulearn-order-secret
+
+  externalSecret:
+    enabled: true
+    refreshInterval: 5m
+    targetSecretName: edulearn-order-secret
+
+    secretStoreRef:
+      name: aws-secrets-manager
+      kind: ClusterSecretStore
+
+    dataFrom:
+      - extract:
+          key: edulearn/prod/order
+
+  configData:
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: "5432"
+    POSTGRES_DB: order_service
+    POSTGRES_SSL_MODE: disable
+    DB_MAX_OPEN_CONNS: "25"
+    DB_MAX_IDLE_CONNS: "5"
+    DB_CONN_MAX_LIFETIME: 5m
+    DB_CONN_MAX_IDLE_TIME: 5m
+
+    # KAFKA CONFIGURATION
+    KAFKA_CLIENT_ID: order-service
+    KAFKA_CONSUMER_GROUP: order-service-group
+    KAFKA_MAX_POLL_RECORDS: "100"
+    KAFKA_FETCH_MAX_BYTES: "5242880"
+    KAFKA_SASL_ENABLED: "false"
+
+    # gRPC CONFIGURATION
+    GRPC_PORT: "50054"
+    GRPC_MAX_CONCURRENT_STREAMS: "100"
+    GRPC_MAX_CONNECTION_IDLE: 15s
+    GRPC_MAX_CONNECTION_AGE: 30s
+    GRPC_MAX_CONNECTION_AGE_GRACE: 5s
+    GRPC_TIME: 2h
+    GRPC_TIMEOUT: 20s
+
+    # OpenTelemetry Jaeger Tracing
+    JAEGER_HOST: jaeger
+    JAEGER_PORT: "6831"
+    JAEGER_ENDPOINT: http://jaeger:4318
+    JAEGER_SAMPLING_RATE: "0.1"
+    JAEGER_SAMPLING_TYPE: probabilistic
+
+    # Prometheus Metrics
+    PROMETHEUS_PORT: "9091"
+    PROMETHEUS_PATH: /metrics
+    METRICS_ENABLED: "true"
+
+    # Logging Configuration
+    LOG_LEVEL: debug
+    LOG_FORMAT: json
+    LOG_FILE: logs/order-service.log
+    LOG_OUTPUT: stdout
+    LOG_MAX_SIZE: 100m
+    LOG_MAX_FILES: "5"
+    LOG_COMPRESS: "true"
+
+    # Tracing Configuration
+    TRACING_ENABLED: "true"
+    TRACING_SAMPLING_RATE: "0.1"
+    TRACING_SERVICE_NAME: order-service
+
+    # HEALTH CHECK CONFIGURATION
+    HEALTH_PORT: "8080"
+    HEALTH_PATH: /health
+    READINESS_PORT: "8080"
+    READINESS_PATH: /ready
+    LIVENESS_PORT: "8080"
+    LIVENESS_PATH: /live
+
+  secretData: {}
+
+  configMounts: []
 
 chat:
-  enabled: true
+  nameOverride: chat
 
-# Stateful components
+  replicaCount: 1
+
+  image:
+    repository: ghcr.io/muhammed-shafeeque-th/edulearn/chat
+    pullPolicy: IfNotPresent
+    tag: "v1.0.5"
+
+  service:
+    type: ClusterIP
+    port: 50059
+    ports:
+      - name: grpc
+        port: 50059
+        targetPort: 50059
+      - name: websocket
+        port: 4009
+        targetPort: 4009
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+
+  livenessProbe: null
+  #   httpGet:
+  #     path: /health
+  #     port: 8086 # http
+  #   initialDelaySeconds: 30
+  #   periodSeconds: 10
+
+  readinessProbe: null
+  #   httpGet:
+  #     path: /health
+  #     port: 8086 # http
+  #   initialDelaySeconds: 5
+  #   periodSeconds: 5
+
+  env:
+    NODE_ENV: "development"
+    SERVICE_NAME: chat-service
+    serviceVersion: "0.0.1"
+    API_PORT: 4009
+    GRPC_PORT: 50059
+
+  configMaps:
+    - edulearn-chat-config
+
+  secretRefs:
+    - edulearn-chat-secret
+
+  externalSecret:
+    enabled: true
+    refreshInterval: 5m
+    targetSecretName: edulearn-chat-secret
+
+    secretStoreRef:
+      name: aws-secrets-manager
+      kind: ClusterSecretStore
+
+    dataFrom:
+      - extract:
+          key: edulearn/prod/chat
+
+  configData:
+    DATABASE_HOST: "postgres"
+    DATABASE_PORT: "5432"
+    DATABASE_NAME: chat_service
+    DATABASE_MAX_CONNECTIONS: "50"
+    DATABASE_MIN_CONNECTIONS: "10"
+    DATABASE_CONNECTION_TIMEOUT: "30000"
+    DATABASE_IDLE_TIMEOUT: "10000"
+
+    # REDIS CONFIGURATION
+    REDIS_DB: "0"
+    REDIS_MAX_CONNECTIONS: "100"
+    REDIS_MIN_CONNECTIONS: "10"
+    REDIS_TTL_DEFAULT: "86400"
+    REDIS_KEY_PREFIX: "edulearn:chat:"
+
+    ALLOWED_ORIGINS: "*"
+
+    # gRPC CONFIGURATION
+    GRPC_PORT: "50059"
+    GRPC_MAX_CONCURRENT_STREAMS: "100"
+    GRPC_MAX_CONNECTION_IDLE: 15s
+    GRPC_MAX_CONNECTION_AGE: 30s
+    GRPC_MAX_CONNECTION_AGE_GRACE: 5s
+    GRPC_TIME: 2h
+    GRPC_TIMEOUT: 20s
+
+    # KAFKA CONFIGURATION
+    KAFKA_CLIENT_ID: chat-service
+    KAFKA_CONSUMER_GROUP: chat-service-group
+    KAFKA_MAX_POLL_RECORDS: "100"
+    KAFKA_FETCH_MAX_BYTES: "5242880"
+    KAFKA_SASL_ENABLED: "false"
+
+    # OBSERVABILITY CONFIGURATION
+
+    # OpenTelemetry Jaeger Tracing
+    JAEGER_SAMPLING_RATE: "0.1"
+    JAEGER_SAMPLING_TYPE: probabilistic
+
+    # Prometheus Metrics
+    PROMETHEUS_PATH: /metrics
+    METRICS_ENABLED: "true"
+
+    # Logging Configuration
+    LOG_LEVEL: debug
+    LOG_FORMAT: json
+    LOG_FILE: logs/chat-service.log
+    LOG_OUTPUT: stdout
+    LOG_MAX_SIZE: 100m
+    LOG_MAX_FILES: "5"
+    LOG_COMPRESS: "true"
+
+    # Tracing Configuration
+    TRACING_ENABLED: "true"
+    TRACING_SAMPLING_RATE: "0.1"
+    TRACING_SERVICE_NAME: chat-service
+
+    # HEALTH CHECK CONFIGURATION
+    HEALTH_PORT: "8086"
+    HEALTH_PATH: /health
+    READINESS_PORT: "8086"
+    READINESS_PATH: /ready
+    LIVENESS_PORT: "8086"
+    LIVENESS_PATH: /live
+
+  configMounts: []
+
+externalSecret:
+    enabled: true
+    refreshInterval: 5m
+    targetSecretName: edulearn-secret
+
+    secretStoreRef:
+      name: aws-secrets-manager
+      kind: ClusterSecretStore
+
+    dataFrom:
+      - extract:
+          key: edulearn/prod/common
+
+configData:
+  REDIS_URL: redis://redis:6379
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  REDIS_LAZY_CONNECT: "true"
+  REDIS_DB: "0"
+  REDIS_MAX_CONNECTIONS: "100"
+  REDIS_MIN_CONNECTIONS: "10"
+  REDIS_TTL: "3600"
+
+  AUTH_SERVICE_GRPC: edulearn-auth:50051
+  USER_SERVICE_GRPC: edulearn-user:50052
+  COURSE_SERVICE_GRPC: edulearn-course:50053
+  SESSION_SERVICE_GRPC: session-svc:50057
+  NOTIFICATION_SERVICE_GRPC: edulearn-notification:50056
+  PAYMENT_SERVICE_GRPC: edulearn-payment:50055
+  ORDER_SERVICE_GRPC: edulearn-order:50054
+  ANALYTICS_SERVICE_GRPC: localhost:50058
+  CHAT_SERVICE_GRPC: edulearn-chat:50059
+
+  # CORS CONFIGURATION
+  ALLOWED_ORIGINS: https://edulearn-client.vercel.app,http://localhost:9000,
+  ALLOWED_METHODS: GET,POST,PUT,DELETE,PATCH,OPTIONS
+
+  # gRPC Client Configuration
+  GRPC_TIMEOUT: "30000"
+  GRPC_MAX_RECEIVE_MESSAGE_LENGTH: "4194304"
+  GRPC_MAX_SEND_MESSAGE_LENGTH: "4194304"
+  GRPC_KEEPALIVE_TIME: "30000"
+  GRPC_KEEPALIVE_TIMEOUT: "5000"
+  GRPC_KEEPALIVE_PERMIT_WITHOUT_CALLS: "true"
+
+  KAFKA_BROKERS: kafka:9092
+  KAFKA_BROKER: kafka:9092
+  KAFKA_SSL: "false"
+  KAFKA_SASL_USERNAME: ""
+  KAFKA_SASL_PASSWORD: ""
+  KAFKA_SASL_MECHANISM: PLAIN
+  KAFKA_CONSUMER_GROUP: api-gateway-group
+  KAFKA_PRODUCER_ACKS: all
+  KAFKA_PRODUCER_RETRIES: "3"
+  KAFKA_PRODUCER_BATCH_SIZE: "16384"
+  KAFKA_PRODUCER_LINGER_MS: "5"
+
+  # Loki Logging
+  LOKI_URL: http://loki:3100
+  LOKI_USERNAME: ""
+  LOKI_PASSWORD: ""
+
+  # Jaeger Tracing
+  JAEGER_ENDPOINT: http://jaeger:4318
+  JAEGER_HOST: jaeger
+  JAEGER_PORT: "6831"
+  JAEGER_SAMPLING_RATE: "0.1"
+  JAEGER_SAMPLING_TYPE: probabilistic
+
+  # Prometheus Metrics
+  PROMETHEUS_PORT: "9090"
+  PROMETHEUS_PATH: /metrics
+  METRICS_ENABLED: "true"
+
+secretData: {}
+
+configMounts: []
+
+# Disable or reduce stateful components for local
 redis:
   enabled: true
-
-kafka:
-  enabled: true
+  # redis:
+  #   master:
+  #     persistence:
+  #       enabled: false # Disable persistence for faster local testing
 
 postgres:
   enabled: true
+  postgresql:
+    primary:
+      persistence:
+        enabled: false
+    auth:
+      password: "password"
 
-# # You can override sub-chart values here
-# postgres:
-#   postgresql:
-#     auth:
-#       password: "postgres-password-change-in-prod"
-#     primary:
-#       persistence:
-#         size: 30Gi
-
-# redis:
-#   redis:
-#     auth:
-#       password: "redis-password-change-in-prod"
-
-# kafka:
-#   kafka:
-#     enabled: true
+kafka:
+  enabled: true
