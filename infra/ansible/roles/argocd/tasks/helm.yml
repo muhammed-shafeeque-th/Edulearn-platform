@@ -1,0 +1,29 @@
+- name: Add Argo Helm Repository
+  kubernetes.core.helm_repository:
+    name: argo
+    repo_url: https://argoproj.github.io/argo-helm
+
+- name: Render values
+  become: true
+  template:
+    src: values.yaml.j2
+    dest: /tmp/argocd-values.yaml
+
+- name: Install ArgoCD
+  kubernetes.core.helm:
+    release_name: "{{ argocd_release }}"
+
+    release_namespace: "{{ argocd_namespace }}"
+
+    chart_ref: argo/argo-cd
+
+    chart_version: "{{ argocd_chart_version }}"
+
+    create_namespace: true
+
+    values_files:
+    - /tmp/argocd-values.yaml
+
+    wait: true
+
+    wait_timeout: 15m

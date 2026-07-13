@@ -1,0 +1,9 @@
+- name: Render TargetGroupConfiguration
+  template:
+    src: targetgroupconfiguration.yaml.j2
+    dest: /tmp/targetgroup.yaml
+
+- name: Apply TargetGroupConfiguration
+  kubernetes.core.k8s:
+    state: present
+    src: /tmp/targetgroup.yaml

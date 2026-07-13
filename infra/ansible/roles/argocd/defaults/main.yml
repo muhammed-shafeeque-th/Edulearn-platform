@@ -1,0 +1,17 @@
+argocd_namespace: argocd
+
+argocd_release: argo-cd
+
+argocd_chart_version: "9.4.0"
+
+argocd_image_updater_release: argocd-image-updater
+
+argocd_image_updater_version: "1.0.5"
+
+argocd_targetgroup_name: argo-tg-config
+
+git_revision: main
+
+repo_path: ./infra
+
+app_namespace: edulearn-app

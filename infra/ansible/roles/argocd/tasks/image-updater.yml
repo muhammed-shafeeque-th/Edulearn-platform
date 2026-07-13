@@ -1,0 +1,23 @@
+- name: Install Image Updater
+  kubernetes.core.helm:
+
+    release_name: argocd-image-updater
+
+    release_namespace: argocd
+
+    chart_ref: argo/argocd-image-updater
+
+    chart_version: "{{ argocd_image_updater_version }}"
+
+    wait: true
+
+- name: Render ImageUpdater
+  become: true
+  template:
+    src: image-updater.yaml.j2
+    dest: /tmp/image-updater.yaml
+
+- name: Apply ImageUpdater
+  kubernetes.core.k8s:
+    state: present
+    src: /tmp/image-updater.yaml

@@ -1,0 +1,10 @@
+- name: Render Application
+  become: true
+  template:
+    src: application.yaml.j2
+    dest: /tmp/application.yaml
+
+- name: Apply Application
+  kubernetes.core.k8s:
+    state: present
+    src: /tmp/application.yaml
