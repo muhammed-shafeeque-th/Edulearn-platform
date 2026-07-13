@@ -9,7 +9,7 @@ fullnameOverride: edulearn
 
 api-gateway:
   enabled: true
-  fullnameOverride: api-gateway
+  fullnameOverride: edulearn-api-gateway
 
   replicaCount: 2
 
@@ -113,7 +113,7 @@ api-gateway:
 
 auth:
   enabled: true
-  fullnameOverride: auth
+  fullnameOverride: edulearn-auth
 
   replicaCount: 1
 
@@ -245,7 +245,7 @@ auth:
 
 user:
   enabled: true
-  fullnameOverride: user
+  fullnameOverride: edulearn-user
 
   replicaCount: 1
 
@@ -397,7 +397,7 @@ user:
 
 course:
   enabled: true
-  fullnameOverride: course
+  fullnameOverride: edulearn-course
 
   replicaCount: 1
 
@@ -543,7 +543,7 @@ course:
 
 payment:
   enabled: true
-  fullnameOverride: payment
+  fullnameOverride: edulearn-payment
 
   replicaCount: 1
 
@@ -708,7 +708,7 @@ payment:
 
 notification:
   enabled: true
-  fullnameOverride: notification
+  fullnameOverride: edulearn-notification
 
   replicaCount: 1
 
@@ -862,7 +862,7 @@ notification:
 
 order:
   enabled: true
-  fullnameOverride: order
+  fullnameOverride: edulearn-order
 
   replicaCount: 1
 
@@ -1004,7 +1004,7 @@ order:
   configMounts: []
 
 chat:
-  fullnameOverride: chat
+  fullnameOverride: edulearn-chat
 
   replicaCount: 1
 
