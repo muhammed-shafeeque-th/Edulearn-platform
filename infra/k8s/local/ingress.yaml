@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: edulearn
+  namespace: edulearn
+
+spec:
+  ingressClassName: nginx
+
+  rules:
+    - host: edulearn.local
+
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+
+            backend:
+              service:
+                name: edulearn-api-gateway
+                port:
+                  number: 4000
