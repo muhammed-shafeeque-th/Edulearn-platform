@@ -1,0 +1,9 @@
+---
+
+- import_tasks: namespace.yml
+
+- import_tasks: serviceaccount.yml
+
+- import_tasks: helm.yml
+
+- import_tasks: verify.yml

@@ -1,0 +1,10 @@
+cluster_name: ""
+aws_region: ""
+aws_account_id: ""
+vpc_id: ""
+
+aws_lbc_version: "3.0.0"
+aws_lbc_policy_version: "v2.14.1"
+
+aws_lbc_namespace: kube-system
+aws_lbc_sa: aws-load-balancer-controller
