@@ -1,0 +1,33 @@
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+
+kind: ImageUpdater
+
+metadata:
+
+  name: edulearn-image-updater
+
+  namespace: argocd
+
+spec:
+
+  namespace: argocd
+
+  applicationRefs:
+
+    - namePattern: "edulearn-*"
+
+      commonUpdateSettings:
+
+        updateStrategy: newest-build
+
+        allowTags: regexp:^sha-[a-f0-9]{7,40}$
+
+      images:
+
+{% for image in argocd_images %}
+
+      - alias: {{ image.alias }}
+
+        imageName: {{ image.repository }}
+
+{% endfor %}

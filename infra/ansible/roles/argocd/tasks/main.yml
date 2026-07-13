@@ -1,0 +1,11 @@
+---
+
+- import_tasks: helm.yml
+
+- import_tasks: targetgroup.yml
+
+- import_tasks: application.yml
+
+- import_tasks: image-updater.yml
+
+- import_tasks: verify.yml

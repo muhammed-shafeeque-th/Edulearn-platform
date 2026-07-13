@@ -1,0 +1,20 @@
+- name: Wait for ArgoCD
+  command: kubectl rollout status deployment/argo-cd-argocd-server -n argocd
+  changed_when: false
+
+- name: Get Initial Password
+  command: >
+    kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}"
+  register: password
+  changed_when: false
+
+- debug:
+    msg: "{{ password.stdout | b64decode }}"
+
+- name: Get Applications
+  command: kubectl get applications -n argocd
+  changed_when: false
+
+- name: Get ImageUpdater
+  command: kubectl get imageupdater -n argocd
+  changed_when: false
