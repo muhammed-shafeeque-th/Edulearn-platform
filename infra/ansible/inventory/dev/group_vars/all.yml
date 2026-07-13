@@ -1,0 +1,53 @@
+cluster_name: edulearn-cluster
+
+aws_region: ap-south-1
+
+aws_account_id: "353452028891"
+
+bastion_public_ip: 13.203.49.19
+
+aws_lbc_version: "3.0.0"
+
+certificate_arn: arn:aws:acm:ap-south-1:353452028891:certificate/87663d39-8905-4f21-aa34-2fd1f72171a1
+
+gateway_hostname: "*.muhammedshafeeque.online"
+
+external_dns_domain_filters:
+- muhammedshafeeque.online
+
+external_dns_txt_owner_id: edulearn-dev
+
+github_repo: https://github.com/muhammed-shafeeque-th/Edulearn-platform
+
+git_revision: main
+
+argocd_hostname: argocd.muhammedshafeeque.online
+
+argocd_images:
+
+- alias: gateway
+  repository: ghcr.io/muhammed-shafeeque-th/edulearn/gateway
+
+- alias: auth
+  repository: ghcr.io/muhammed-shafeeque-th/edulearn/auth
+
+- alias: user
+  repository: ghcr.io/muhammed-shafeeque-th/edulearn/user
+
+- alias: course
+  repository: ghcr.io/muhammed-shafeeque-th/edulearn/course
+
+- alias: notification
+  repository: ghcr.io/muhammed-shafeeque-th/edulearn/notification
+
+- alias: payment
+  repository: ghcr.io/muhammed-shafeeque-th/edulearn/payment
+
+- alias: order
+  repository: ghcr.io/muhammed-shafeeque-th/edulearn/order
+
+- alias: chat
+  repository: ghcr.io/muhammed-shafeeque-th/edulearn/chat
+
+eks_cluster_endpoint: https://0CB4256764F5D536574AA84E39693F61.gr7.ap-south-1.eks.amazonaws.com
+vpc_id: vpc-0e0891ab34a37b1fc
