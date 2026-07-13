@@ -1221,17 +1221,37 @@ secretData: {}
 
 configMounts: []
 
-# Disable or reduce stateful components for local
 redis:
   enabled: true
-  # redis:
-  #   master:
-  #     persistence:
-  #       enabled: false # Disable persistence for faster local testing
+
+  redis:
+    architecture: standalone
+
+    auth:
+      enabled: false
+
+    master:
+      persistence:
+        enabled: true
+        storageClass: gp2      # or gp3 if you create it
+        size: 2Gi
+
+    replica:
+      replicaCount: 0
+
+    commonConfiguration: |-
+      appendonly yes
+      save 60 1000
+
+    networkPolicy:
+      enabled: false
+
+    metrics:
+      enabled: false
 
 postgres:
-  postgresql:
-    enabled: true
+  enabled: true
+  postgres:
 
     auth:
       existingSecret: postgres-secret
@@ -1269,14 +1289,14 @@ postgres:
         cpu: 1000m
         memory: 2Gi
 
-    externalsecret:
+    externalSecret:
       enabled: true
 
       targetSecretName: postgres-secret
 
       refreshInterval: 1h
 
-      secretStore:
+      secretStoreRef:
         name: aws-secrets-manager
 
         kind: ClusterSecretStore
@@ -1300,3 +1320,48 @@ postgres:
 
 kafka:
   enabled: true
+
+  kafka:
+
+    kraft:
+      enabled: true
+
+    zookeeper:
+      enabled: false
+
+    controller:
+      replicaCount: 1
+
+      persistence:
+        enabled: true
+        storageClass: gp2
+        size: 2Gi
+
+    broker:
+      replicaCount: 1
+
+      persistence:
+        enabled: true
+        storageClass: gp2
+        size: 2Gi
+
+    listeners:
+      client:
+        protocol: PLAINTEXT
+
+      controller:
+        protocol: PLAINTEXT
+
+      interbroker:
+        protocol: PLAINTEXT
+
+    autoCreateTopicsEnable: true
+    deleteTopicEnable: true
+
+    defaultReplicationFactor: 1
+    offsetsTopicReplicationFactor: 1
+    transactionStateLogReplicationFactor: 1
+    transactionStateLogMinIsr: 1
+
+    networkPolicy:
+      enabled: false
