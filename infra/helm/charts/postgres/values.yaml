@@ -6,7 +6,7 @@ postgresql:
 
   auth:
 
-    username: edulearn
+    username: postgres
 
     password: ""
 
