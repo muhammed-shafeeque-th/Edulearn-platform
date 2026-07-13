@@ -5,11 +5,11 @@ global:
   secretRefs:
     - edulearn-secret
 
-nameOverride: edulearn
+fullnameOverride: edulearn
 
 api-gateway:
   enabled: true
-  nameOverride: api-gateway
+  fullnameOverride: api-gateway
 
   replicaCount: 2
 
@@ -113,7 +113,7 @@ api-gateway:
 
 auth:
   enabled: true
-  nameOverride: auth
+  fullnameOverride: auth
 
   replicaCount: 1
 
@@ -245,7 +245,7 @@ auth:
 
 user:
   enabled: true
-  nameOverride: user
+  fullnameOverride: user
 
   replicaCount: 1
 
@@ -397,7 +397,7 @@ user:
 
 course:
   enabled: true
-  nameOverride: course
+  fullnameOverride: course
 
   replicaCount: 1
 
@@ -543,7 +543,7 @@ course:
 
 payment:
   enabled: true
-  nameOverride: payment
+  fullnameOverride: payment
 
   replicaCount: 1
 
@@ -708,7 +708,7 @@ payment:
 
 notification:
   enabled: true
-  nameOverride: notification
+  fullnameOverride: notification
 
   replicaCount: 1
 
@@ -862,7 +862,7 @@ notification:
 
 order:
   enabled: true
-  nameOverride: order
+  fullnameOverride: order
 
   replicaCount: 1
 
@@ -1004,7 +1004,7 @@ order:
   configMounts: []
 
 chat:
-  nameOverride: chat
+  fullnameOverride: chat
 
   replicaCount: 1
 
