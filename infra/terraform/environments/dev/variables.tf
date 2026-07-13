@@ -9,6 +9,18 @@ variable "environment" {
   default = "development"
 
 }
+variable "kube_config_path" {
+  type    = string
+  default = "~/.kube/config"
+
+}
+
+variable "outputs_yaml_path" {
+  description = "Path to write the outputs YAML file"
+  type        = string
+  default     = "d:/edulearn-platform/infra/terraform/environments/dev/outputs.yaml"
+}
+
 
 variable "region" {
   description = "AWS Region"
