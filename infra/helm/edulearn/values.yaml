@@ -61,7 +61,7 @@ api-gateway:
 
   secretRefs:
     - edulearn-api-gateway-secret
-  
+
   externalSecret:
     enabled: true
     refreshInterval: 5m
@@ -106,7 +106,6 @@ api-gateway:
     TRACING_ENABLED: "true"
     TRACING_SAMPLING_RATE: "0.1"
     TRACING_SERVICE_NAME: gateway-service
-  
 
   secretData: {}
   configMounts: []
@@ -237,7 +236,6 @@ auth:
     READINESS_PATH: /ready
     LIVENESS_PORT: "8086"
     LIVENESS_PATH: /live
-  
 
   secretData: {}
 
@@ -457,7 +455,7 @@ course:
 
   secretRefs:
     - edulearn-course-secret
-    
+
   externalSecret:
     enabled: true
     refreshInterval: 5m
@@ -613,7 +611,7 @@ payment:
 
   secretRefs:
     - edulearn-payment-secret
-  
+
   externalSecret:
     enabled: true
     refreshInterval: 5m
@@ -772,7 +770,7 @@ notification:
 
   secretRefs:
     - edulearn-notification-secret
-  
+
   externalSecret:
     enabled: true
     refreshInterval: 5m
@@ -1147,16 +1145,16 @@ chat:
   configMounts: []
 
 externalSecret:
-    enabled: true
-    refreshInterval: 5m
-    targetSecretName: edulearn
-    secretStoreRef:
-      name: aws-secrets-manager
-      kind: ClusterSecretStore
+  enabled: true
+  refreshInterval: 5m
+  targetSecretName: edulearn
+  secretStoreRef:
+    name: aws-secrets-manager
+    kind: ClusterSecretStore
 
-    dataFrom:
-      - extract:
-          key: edulearn/prod/common
+  dataFrom:
+    - extract:
+        key: edulearn/prod/common
 
 configData:
   REDIS_URL: redis://redis:6379
@@ -1232,13 +1230,73 @@ redis:
   #       enabled: false # Disable persistence for faster local testing
 
 postgres:
-  enabled: true
   postgresql:
+    enabled: true
+
+    auth:
+      existingSecret: postgres-secret
+
+      secretKeys:
+        adminPasswordKey: postgres-password
+        userPasswordKey: password
+
+      username: edulearn
+      database: edulearn
+
+      #   userKey: username
+
+      #   databaseKey: database
+
+    architecture: standalone # Change to replication for HA in prod
+
     primary:
       persistence:
-        enabled: false
-    auth:
-      password: "password"
+        enabled: true
+        size: 2Gi
+
+    readReplicas:
+      enabled: false
+
+    service:
+      type: ClusterIP
+      port: 5432
+
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+
+    externalsecret:
+      enabled: true
+
+      targetSecretName: postgres-secret
+
+      refreshInterval: 1h
+
+      secretStore:
+        name: aws-secrets-manager
+
+        kind: ClusterSecretStore
+
+      data:
+        - secretKey: postgres-password
+          remoteKey: edulearn/prod/postgres
+          property: postgres-password
+
+        - secretKey: password
+          remoteKey: edulearn/prod/postgres
+          property: password
+
+        - secretKey: username
+          remoteKey: edulearn/prod/postgres
+          property: username
+
+        - secretKey: database
+          remoteKey: edulearn/prod/postgres
+          property: database
 
 kafka:
   enabled: true
