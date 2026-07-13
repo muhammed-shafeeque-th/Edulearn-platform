@@ -1,14 +1,34 @@
+enabled: true
+
 redis:
-  enabled: true
   architecture: standalone
+
   auth:
-    enabled: true
-    password: "redis-password-change-in-prod"   # Use External Secrets in real prod
+    enabled: false
+
   master:
     persistence:
       enabled: true
-      size: 10Gi
+      # storageClass: gp3
+      # size: 8Gi
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
   replica:
-    persistence:
-      enabled: true
-      size: 10Gi
+    replicaCount: 0
+
+  commonConfiguration: |-
+    appendonly yes
+    save 60 1000
+
+  networkPolicy:
+    enabled: false
+
+  metrics:
+    enabled: false
