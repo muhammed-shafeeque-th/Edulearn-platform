@@ -7,7 +7,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/muhammed-shafeeque-th/Edulearn.git
+    repoURL: https://github.com/muhammed-shafeeque-th/Edulearn-platform.git
     targetRevision: HEAD
     path: ./infra
 
