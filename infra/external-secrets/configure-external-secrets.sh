@@ -35,6 +35,8 @@ helm install external-secrets external-secrets/external-secrets \
   --set installCRDs=true \
   --version 0.15.0
 
+kubectl apply -R -f ./manifests
+
 kubectl get pods -n external-secrets
 
 kubectl get externalsecret -n edulearn
