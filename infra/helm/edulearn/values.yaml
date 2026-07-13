@@ -65,7 +65,7 @@ api-gateway:
   externalSecret:
     enabled: true
     refreshInterval: 5m
-    targetSecretName: edulearn-api-secret
+    targetSecretName: edulearn-api-gateway
 
     secretStoreRef:
       name: aws-secrets-manager
