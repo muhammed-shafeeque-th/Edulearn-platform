@@ -1,11 +1,73 @@
+enabled: true
+
 kafka:
-  enabled: true
-  replicas: 3
-  persistence:
+
+  kraft:
     enabled: true
-    size: 50Gi
+
   zookeeper:
-    enabled: true
+    enabled: false
+
+  controller:
+
+    replicaCount: 1
+
     persistence:
       enabled: true
+      storageClass: gp3
       size: 10Gi
+
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: "1"
+        memory: 1Gi
+
+  broker:
+
+    replicaCount: 1
+
+    persistence:
+      enabled: true
+      storageClass: gp3
+      size: 20Gi
+
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: "2"
+        memory: 2Gi
+
+  listeners:
+
+    client:
+      protocol: PLAINTEXT
+
+    controller:
+      protocol: PLAINTEXT
+
+    interbroker:
+      protocol: PLAINTEXT
+
+  autoCreateTopicsEnable: true
+
+  deleteTopicEnable: true
+
+  defaultReplicationFactor: 1
+
+  offsetsTopicReplicationFactor: 1
+
+  transactionStateLogReplicationFactor: 1
+
+  transactionStateLogMinIsr: 1
+
+  networkPolicy:
+    enabled: false
+
+  metrics:
+    kafka:
+      enabled: false
