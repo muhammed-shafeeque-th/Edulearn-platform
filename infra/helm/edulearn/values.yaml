@@ -1240,7 +1240,7 @@ postgres:
         adminPasswordKey: postgres-password
         userPasswordKey: password
 
-      username: edulearn
+      username: postgres
       database: edulearn
 
       #   userKey: username
