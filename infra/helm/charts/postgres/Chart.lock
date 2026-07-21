@@ -1,6 +1,9 @@
 dependencies:
+- name: edulearn-common
+  repository: file://../../edulearn-common
+  version: 1.0.1
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
-  version: 15.5.38
-digest: sha256:24a73fb50cc25e573faaf9e12570d97c903a4fe843e5d9c7db2ec07b42e17ba5
-generated: "2026-07-13T11:24:38.3874791+05:30"
+  version: 18.7.13
+digest: sha256:3b26b08c94246a8b9225ace8542ed90ffe224d6b81b765cf204a1bd64084816d
+generated: "2026-07-13T23:29:00.3746583+05:30"
