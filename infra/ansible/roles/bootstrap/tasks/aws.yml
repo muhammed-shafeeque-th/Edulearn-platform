@@ -1,0 +1,25 @@
+- name: Check AWS CLI
+  command: aws --version
+  changed_when: false
+
+- name: Configure AWS Access Key
+  command: >
+    aws configure set aws_access_key_id {{ aws_access_key_id }}
+  when: aws_access_key_id | length > 0
+
+- name: Configure AWS Secret Key
+  command: >
+    aws configure set aws_secret_access_key {{ aws_secret_access_key }}
+  when: aws_secret_access_key | length > 0
+
+- name: Configure AWS Region
+  command: >
+    aws configure set region {{ aws_region }}
+
+- name: Verify AWS credentials
+  command: aws sts get-caller-identity
+  register: aws_identity
+  changed_when: false
+
+- debug:
+    var: aws_identity.stdout

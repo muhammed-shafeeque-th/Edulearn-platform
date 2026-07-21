@@ -1,0 +1,5 @@
+---
+- import_tasks: aws.yml
+- import_tasks: kubeconfig.yml
+- import_tasks: python.yml
+- import_tasks: verify.yml

@@ -1,0 +1,11 @@
+- name: Verify cluster
+  command: kubectl cluster-info
+  changed_when: false
+
+- name: Verify worker nodes
+  command: kubectl get nodes
+  register: nodes
+  changed_when: false
+
+- debug:
+    var: nodes.stdout_lines
