@@ -1,0 +1,21 @@
+external_dns_namespace: external-dns
+
+external_dns_sa: external-dns
+
+external_dns_release: external-dns
+
+external_dns_chart_version: "1.20.0"
+
+external_dns_policy_name: AllowExternalDNSUpdates
+
+external_dns_role_name: external-dns-pod-identity-role
+
+external_dns_provider: aws
+
+external_dns_registry: txt
+
+external_dns_policy: sync
+
+external_dns_domain_filters: []
+
+external_dns_txt_owner_id: "{{ cluster_name }}"

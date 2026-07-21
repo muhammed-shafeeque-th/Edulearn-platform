@@ -1,0 +1,6 @@
+- name: Create namespace
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Namespace
+    name: "{{ external_dns_namespace }}"
+    state: present
