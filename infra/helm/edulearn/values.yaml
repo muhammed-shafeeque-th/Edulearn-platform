@@ -1233,7 +1233,7 @@ redis:
     master:
       persistence:
         enabled: true
-        storageClass: gp2      # or gp3 if you create it
+        storageClass: gp3 # or gp3 if you create it
         size: 2Gi
 
     replica:
@@ -1247,12 +1247,20 @@ redis:
       enabled: false
 
     metrics:
-      enabled: false
+      enabled: true
+
+      serviceMonitor:
+        enabled: true
+        namespace: monitoring
+
+        interval: 30s
+
+        labels:
+          release: kube-prometheus-stack
 
 postgres:
   enabled: true
   postgres:
-
     auth:
       existingSecret: postgres-secret
 
@@ -1317,12 +1325,23 @@ postgres:
         - secretKey: database
           remoteKey: edulearn/prod/postgres
           property: database
+    metrics:
+      enabled: true
+
+      serviceMonitor:
+        enabled: true
+
+        namespace: monitoring
+
+        labels:
+          release: kube-prometheus-stack
+
+        interval: 30s
 
 kafka:
   enabled: true
 
   kafka:
-
     kraft:
       enabled: true
 
@@ -1334,7 +1353,7 @@ kafka:
 
       persistence:
         enabled: true
-        storageClass: gp2
+        storageClass: gp3
         size: 2Gi
 
     broker:
@@ -1342,7 +1361,7 @@ kafka:
 
       persistence:
         enabled: true
-        storageClass: gp2
+        storageClass: gp3
         size: 2Gi
 
     listeners:
@@ -1365,3 +1384,19 @@ kafka:
 
     networkPolicy:
       enabled: false
+  metrics:
+    kafka:
+      enabled: true
+
+    jmx:
+      enabled: true
+
+    serviceMonitor:
+      enabled: true
+
+      namespace: monitoring
+
+      labels:
+        release: kube-prometheus-stack
+
+      interval: 30s
