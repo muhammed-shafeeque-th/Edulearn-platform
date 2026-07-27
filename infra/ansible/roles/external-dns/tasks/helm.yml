@@ -1,0 +1,28 @@
+- name: Add ExternalDNS Helm repository
+  kubernetes.core.helm_repository:
+    name: external-dns
+    repo_url: https://kubernetes-sigs.github.io/external-dns/
+
+- name: Render values
+  become: true
+  template:
+    src: values.yaml.j2
+    dest: /tmp/external-dns-values.yaml
+
+- name: Install ExternalDNS
+  kubernetes.core.helm:
+    release_name: "{{ external_dns_release }}"
+    release_namespace: "{{ external_dns_namespace }}"
+
+    chart_ref: external-dns/external-dns
+
+    chart_version: "{{ external_dns_chart_version }}"
+
+    create_namespace: false
+
+    values_files:
+    - /tmp/external-dns-values.yaml
+
+    wait: true
+
+    wait_timeout: 10m

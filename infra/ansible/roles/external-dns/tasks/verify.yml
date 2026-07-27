@@ -1,0 +1,11 @@
+- name: Wait for Deployment
+  command: kubectl rollout status deployment/external-dns -n external-dns
+  changed_when: false
+
+- name: Get Pods
+  command: kubectl get pods -n external-dns
+  register: pods
+  changed_when: false
+
+- debug:
+    var: pods.stdout_lines

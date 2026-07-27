@@ -16,11 +16,23 @@ api-gateway:
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/gateway
     pullPolicy: IfNotPresent
-    tag: "v1.0.5"
+    tag: "v1.1.5"
 
   service:
     type: ClusterIP
-    port: 4000
+    ports:
+      - name: http
+        port: 3000
+        targetPort: 3000
+      - name: api
+        port: 4000
+        targetPort: 4000
+
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    path: /metrics
+    port: http   # matches the fixed template key (was reading .portName, a key nothing set)
 
   resources:
     limits:
@@ -36,23 +48,24 @@ api-gateway:
     maxReplicas: 10
     targetCPUUtilizationPercentage: 80
 
-  livenessProbe: null
-  #   httpGet:
-  #     path: /health
-  #     port: 4000 # http
-  #   initialDelaySeconds: 30
-  #   periodSeconds: 10
+  livenessProbe:
+    httpGet:
+      path: /healthz
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
 
-  readinessProbe: null
-  #   httpGet:
-  #     path: /health
-  #     port: 4000 # http
-  #   initialDelaySeconds: 5
-  #   periodSeconds: 5
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 5
 
   env:
-    NODE_ENV: "development"
+    NODE_ENV: "production"
     PORT: "4000"
+    HTTP_PORT: "3000"
     SERVICE_NAME: api-gateway
     serviceVersion: "0.0.1"
 
@@ -76,34 +89,13 @@ api-gateway:
           key: edulearn/prod/api-gateway
 
   configData:
-    # OpenTelemetry Jaeger Tracing
-    JAEGER_HOST: jaeger
-    JAEGER_PORT: "6831"
-    JAEGER_ENDPOINT: http://jaeger:4318
-    JAEGER_SAMPLING_RATE: "0.1"
-    JAEGER_SAMPLING_TYPE: probabilistic
-
-    # Prometheus Metrics
-    PROMETHEUS_PORT: "9091"
-    PROMETHEUS_PATH: /metrics
+    METRICS_PATH: /metrics
     METRICS_ENABLED: "true"
 
-    # Loki Logging
-    LOKI_URL: http://loki:3100
-    LOKI_USERNAME: ""
-    LOKI_PASSWORD: ""
-
     # Logging Configuration
-    LOG_LEVEL: debug
+    LOG_LEVEL: info
     LOG_FORMAT: json
-    LOG_FILE: logs/gateway-service.log
-    LOG_OUTPUT: stdout
-    LOG_MAX_SIZE: 100m
-    LOG_MAX_FILES: "5"
-    LOG_COMPRESS: "true"
 
-    # Tracing Configuration
-    TRACING_ENABLED: "true"
     TRACING_SAMPLING_RATE: "0.1"
     TRACING_SERVICE_NAME: gateway-service
 
@@ -114,23 +106,48 @@ auth:
   enabled: true
   fullnameOverride: edulearn-auth
 
-  replicaCount: 1
+  replicaCount: 2   # auth is a critical path, needs HA
+
+  # ADDED: pod disruption budget — with replicaCount 2, a node drain could
+  # previously take both replicas down at once; this guarantees at least 1
+  # stays up during voluntary disruptions.
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+
+  # ADDED: spread the two replicas across nodes so they don't co-locate and
+  # defeat the point of running 2 for HA.
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: auth
+                app.kubernetes.io/instance: "{{ .Release.Name }}"
+            topologyKey: kubernetes.io/hostname
 
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/auth
     pullPolicy: IfNotPresent
-    tag: "v1.0.5"
+    tag: "v1.1.5"
 
   service:
     type: ClusterIP
-    port: 50051
     ports:
       - name: http
-        port: 3001
-        targetPort: 3001
+        port: 3000
+        targetPort: 3000
       - name: grpc
         port: 50051
         targetPort: 50051
+
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    path: /metrics
+    port: http
 
   resources:
     limits:
@@ -146,25 +163,25 @@ auth:
     maxReplicas: 10
     targetCPUUtilizationPercentage: 80
 
-  livenessProbe: null
-  #   httpGet:
-  #     path: /health
-  #     port: 8086 # http
-  #   initialDelaySeconds: 30
-  #   periodSeconds: 10
+  livenessProbe:
+    httpGet:
+      path: /healthz
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
 
-  readinessProbe: null
-  #   httpGet:
-  #     path: /health
-  #     port: 8086 # http
-  #   initialDelaySeconds: 5
-  #   periodSeconds: 5
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 5
 
   env:
-    NODE_ENV: "development"
+    NODE_ENV: "production"
     SERVICE_NAME: auth-service
     serviceVersion: "0.0.1"
-    API_PORT: 3002
+    HTTP_PORT: 3000
     GRPC_PORT: 50051
 
   configMaps:
@@ -195,50 +212,38 @@ auth:
     DB_MAX_OPEN_CONNS: "25"
     DB_MAX_IDLE_CONNS: "5"
 
-    # TEMPLATE CONFIG
     TEMPLATE_BASE_DIR: dist/shared/templates
     COMPANY_NAME: EduLearn
     COMPANY_ADDRESS: EduLearn Inc., 456 Learning Avenue, San Francisco, CA 94102
     SUPPORT_EMAIL: support@edulearn.com
     BASE_URL: https://edulearn.com
 
-    # Social Links
     TWITTER_URL: https://twitter.com/edulearn
     FACEBOOK_URL: https://facebook.com/edulearn
     LINKEDIN_URL: https://linkedin.com/company/edulearn
     INSTAGRAM_URL: https://instagram.com/edulearn
     YOUTUBE_URL: https://youtube.com/@edulearn
 
-    # REDIS CONFIGURATION
     REDIS_DB: "1"
     REDIS_MAX_CONNECTIONS: "100"
     REDIS_MIN_CONNECTIONS: "10"
     REDIS_TTL_DEFAULT: "86400"
     REDIS_KEY_PREFIX: "edulearn:auth:"
 
-    # gRPC CONFIGURATION
-    GRPC_PORT: "50052"
+    GRPC_PORT: "50051"
     GRPC_MAX_CONCURRENT_STREAMS: "100"
     GRPC_MAX_CONNECTION_IDLE: 15s
     GRPC_MAX_CONNECTION_AGE_GRACE: 5s
 
-    # KAFKA CONFIGURATION
     KAFKA_CLIENT_ID: auth-service
     KAFKA_CONSUMER_GROUP: auth-service-group
     KAFKA_MAX_POLL_RECORDS: "100"
     KAFKA_FETCH_MAX_BYTES: "5242880"
     KAFKA_SASL_ENABLED: "false"
 
-    # HEALTH CHECK CONFIGURATION
-    HEALTH_PORT: "8086"
-    HEALTH_PATH: /health
-    READINESS_PORT: "8086"
-    READINESS_PATH: /ready
-    LIVENESS_PORT: "8086"
-    LIVENESS_PATH: /live
+    LOG_LEVEL: info
 
   secretData: {}
-
   configMounts: []
 
 user:
@@ -250,18 +255,23 @@ user:
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/user
     pullPolicy: IfNotPresent
-    tag: "v1.0.5"
+    tag: "v1.1.5"
 
   service:
     type: ClusterIP
-    port: 50052
     ports:
       - name: grpc
         port: 50052
         targetPort: 50052
       - name: http
-        port: 3002
-        targetPort: 3002
+        port: 3000
+        targetPort: 3000
+
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    path: /metrics
+    port: http
 
   resources:
     limits:
@@ -277,25 +287,25 @@ user:
     maxReplicas: 10
     targetCPUUtilizationPercentage: 80
 
-  livenessProbe: null
-  #   httpGet:
-  #     path: /health
-  #     port: 8085 # http
-  #   initialDelaySeconds: 30
-  #   periodSeconds: 10
+  livenessProbe:
+    httpGet:
+      path: /healthz
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
 
-  readinessProbe: null
-  #   httpGet:
-  #     path: /health
-  #     port: 8085 # http
-  #   initialDelaySeconds: 5
-  #   periodSeconds: 5
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 5
 
   env:
-    NODE_ENV: "development"
+    NODE_ENV: "production"
     SERVICE_NAME: user-service
     SERVICE_VERSION: "0.0.1"
-    API_PORT: 3002
+    HTTP_PORT: 3000
     GRPC_PORT: 50052
 
   configMaps:
@@ -327,21 +337,18 @@ user:
     DB_CONN_MAX_LIFETIME: 5m
     DB_CONN_MAX_IDLE_TIME: 5m
 
-    # REDIS CONFIGURATION
     REDIS_DB: "0"
     REDIS_MAX_CONNECTIONS: "100"
     REDIS_MIN_CONNECTIONS: "10"
     REDIS_TTL_DEFAULT: "86400"
     REDIS_KEY_PREFIX: "edulearn:user:"
 
-    # KAFKA CONFIGURATION
     KAFKA_CLIENT_ID: user-service
     KAFKA_CONSUMER_GROUP: user-service-group
     KAFKA_MAX_POLL_RECORDS: "100"
     KAFKA_FETCH_MAX_BYTES: "5242880"
     KAFKA_SASL_ENABLED: "false"
 
-    # gRPC CONFIGURATION
     GRPC_PORT: "50052"
     GRPC_MAX_CONCURRENT_STREAMS: "100"
     GRPC_MAX_CONNECTION_IDLE: 15s
@@ -350,47 +357,13 @@ user:
     GRPC_TIME: 2h
     GRPC_TIMEOUT: 20s
 
-    # OpenTelemetry Jaeger Tracing
-    JAEGER_HOST: jaeger
-    JAEGER_PORT: "6831"
-    JAEGER_ENDPOINT: http://jaeger:4318
-    JAEGER_SAMPLING_RATE: "0.1"
-    JAEGER_SAMPLING_TYPE: probabilistic
-
-    # Prometheus Metrics
-    PROMETHEUS_PORT: "9091"
-    PROMETHEUS_PATH: /metrics
-    METRICS_ENABLED: "true"
-
-    # Loki Logging
-    LOKI_URL: http://loki:3100
-    LOKI_USERNAME: ""
-    LOKI_PASSWORD: ""
-
-    # Logging Configuration
-    LOG_LEVEL: debug
-    LOG_FORMAT: json
-    LOG_FILE: logs/user-service.log
-    LOG_OUTPUT: stdout
-    LOG_MAX_SIZE: 100m
-    LOG_MAX_FILES: "5"
+    LOG_LEVEL: info
     LOG_COMPRESS: "true"
 
-    # Tracing Configuration
     TRACING_ENABLED: "true"
-    TRACING_SAMPLING_RATE: "0.1"
     TRACING_SERVICE_NAME: user-service
 
-    # HEALTH CHECK CONFIGURATION
-    HEALTH_PORT: "8082"
-    HEALTH_PATH: /health
-    READINESS_PORT: "8082"
-    READINESS_PATH: /ready
-    LIVENESS_PORT: "8082"
-    LIVENESS_PATH: /live
-
   secretData: {}
-
   configMounts: []
 
 course:
@@ -402,18 +375,23 @@ course:
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/course
     pullPolicy: IfNotPresent
-    tag: "v1.0.5"
+    tag: "v1.1.5"
 
   service:
     type: ClusterIP
-    port: 50053
     ports:
       - name: http
-        port: 3003
-        targetPort: 3003
+        port: 3000
+        targetPort: 3000
       - name: grpc
         port: 50053
         targetPort: 50053
+
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    path: /metrics
+    port: http
 
   resources:
     limits:
@@ -429,25 +407,25 @@ course:
     maxReplicas: 10
     targetCPUUtilizationPercentage: 80
 
-  livenessProbe: null
-  #   httpGet:
-  #     path: /health
-  #     port: 8083 # http
-  #   initialDelaySeconds: 30
-  #   periodSeconds: 10
+  livenessProbe:
+    httpGet:
+      path: /healthz
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
 
-  readinessProbe: null
-  #   httpGet:
-  #     path: /health
-  #     port: 8083 # http
-  #   initialDelaySeconds: 5
-  #   periodSeconds: 5
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 5
 
   env:
-    NODE_ENV: "development"
+    NODE_ENV: "production"
     SERVICE_NAME: course-service
     serviceVersion: "0.0.1"
-    API_PORT: 3003
+    HTTP_PORT: 3000
     GRPC_PORT: 50053
 
   configMaps:
@@ -478,21 +456,18 @@ course:
     DATABASE_CONNECTION_TIMEOUT: "30000"
     DATABASE_IDLE_TIMEOUT: "10000"
 
-    # KAFKA CONFIGURATION
     KAFKA_CLIENT_ID: course-service
     KAFKA_CONSUMER_GROUP: course-service-group
     KAFKA_MAX_POLL_RECORDS: "100"
     KAFKA_FETCH_MAX_BYTES: "5242880"
     KAFKA_SASL_ENABLED: "false"
 
-    # REDIS CONFIGURATION
     REDIS_DB: "4"
     REDIS_MAX_CONNECTIONS: "100"
     REDIS_MIN_CONNECTIONS: "10"
     REDIS_TTL_DEFAULT: "86400"
     REDIS_KEY_PREFIX: "edulearn:course:"
 
-    # gRPC CONFIGURATION
     GRPC_PORT: "50053"
     GRPC_MAX_CONCURRENT_STREAMS: "100"
     GRPC_MAX_CONNECTION_IDLE: 15s
@@ -501,58 +476,49 @@ course:
     GRPC_TIME: 2h
     GRPC_TIMEOUT: 20s
 
-    # OBSERVABILITY CONFIGURATION
-
-    # OpenTelemetry Jaeger Tracing
-    JAEGER_SAMPLING_RATE: "0.1"
-    JAEGER_SAMPLING_TYPE: probabilistic
-
-    # Prometheus Metrics
-    PROMETHEUS_PATH: /metrics
+    METRICS_PATH: /metrics
     METRICS_ENABLED: "true"
 
-    # Logging Configuration
-    LOG_LEVEL: debug
-    LOG_FORMAT: json
-    LOG_FILE: logs/course-service.log
-    LOG_OUTPUT: stdout
-    LOG_MAX_SIZE: 100m
-    LOG_MAX_FILES: "5"
+    LOG_LEVEL: info
     LOG_COMPRESS: "true"
 
-    # Tracing Configuration
     TRACING_ENABLED: "true"
-    TRACING_SAMPLING_RATE: "0.1"
     TRACING_SERVICE_NAME: course-service
 
-    #OTP_TEMPLATE_PATH=app\internal\shared\template\activation-mail.html
-
-    # HEALTH CHECK CONFIGURATION
-    HEALTH_PORT: "8083"
-    HEALTH_PATH: /health
-    READINESS_PORT: "8083"
-    READINESS_PATH: /ready
-    LIVENESS_PORT: "8083"
-    LIVENESS_PATH: /live
-
   secretData: {}
-
   configMounts: []
 
 payment:
   enabled: true
   fullnameOverride: edulearn-payment
 
-  replicaCount: 1
+  replicaCount: 2   # payment is the other critical path, needs HA
+
+  # ADDED: same reasoning as auth — 2 replicas need a PDB or a single node
+  # drain can take the whole service down.
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+
+  # ADDED: spread replicas across nodes.
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: payment
+                app.kubernetes.io/instance: "{{ .Release.Name }}"
+            topologyKey: kubernetes.io/hostname
 
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/payment
     pullPolicy: IfNotPresent
-    tag: "v1.0.5"
+    tag: "v1.1.5"
 
   service:
     type: ClusterIP
-    port: 50055
     ports:
       - name: grpc
         port: 50055
@@ -566,10 +532,12 @@ payment:
         port: 3000
         targetPort: 3000
         protocol: TCP
-      - name: metrics
-        port: 9091
-        targetPort: 9091
-        protocol: TCP
+
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    path: /metrics
+    port: http
 
   resources:
     limits:
@@ -585,25 +553,26 @@ payment:
     maxReplicas: 10
     targetCPUUtilizationPercentage: 80
 
-  livenessProbe: null
-  #   httpGet:
-  #     path: /health
-  #     port: 8085 # http
-  #   initialDelaySeconds: 30
-  #   periodSeconds: 10
+  livenessProbe:
+    httpGet:
+      path: /healthz
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
 
-  readinessProbe: null
-  #   httpGet:
-  #     path: /health
-  #     port: 8085 # http
-  #   initialDelaySeconds: 5
-  #   periodSeconds: 5
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 5
 
   env:
-    NODE_ENV: "development"
+    NODE_ENV: "production"
     SERVICE_NAME: payment-service
     SERVICE_VERSION: "0.0.1"
     API_PORT: 4005
+    HTTP_PORT: 3000
     GRPC_PORT: 50055
 
   configMaps:
@@ -636,22 +605,19 @@ payment:
     DB_CONN_MAX_LIFETIME: 5m
     DB_CONN_MAX_IDLE_TIME: 5m
 
-    # KAFKA CONFIGURATION
     KAFKA_CLIENT_ID: payment-service
     KAFKA_CONSUMER_GROUP: payment-service-group
     KAFKA_MAX_POLL_RECORDS: "100"
     KAFKA_FETCH_MAX_BYTES: "5242880"
     KAFKA_SASL_ENABLED: "false"
 
-    # Redis
     REDIS_DB: "7"
     REDIS_MAX_CONNECTIONS: "100"
     REDIS_MIN_CONNECTIONS: "10"
     REDIS_TTL: "3600"
     REDIS_KEY_PREFIX: "edulearn:payment:"
 
-    # gRPC CONFIGURATION
-    GRPC_PORT: "50056"
+    GRPC_PORT: "50055"
     GRPC_MAX_CONCURRENT_STREAMS: "100"
     GRPC_MAX_CONNECTION_IDLE: 15s
     GRPC_MAX_CONNECTION_AGE: 30s
@@ -659,49 +625,13 @@ payment:
     GRPC_TIME: 2h
     GRPC_TIMEOUT: 20s
 
-    # OpenTelemetry Jaeger Tracing
-    JAEGER_HOST: jaeger
-    JAEGER_PORT: "6831"
-    JAEGER_ENDPOINT: http://jaeger:4318
-    JAEGER_SAMPLING_RATE: "0.1"
-    JAEGER_SAMPLING_TYPE: probabilistic
+    LOG_LEVEL: info
 
-    # Prometheus Metrics
-    PROMETHEUS_PORT: "9091"
-    PROMETHEUS_PATH: /metrics
-    METRICS_ENABLED: "true"
-
-    # Loki Logging
-    LOKI_URL: http://loki:3100
-    LOKI_paymentNAME: ""
-    LOKI_PASSWORD: ""
-
-    # Logging Configuration
-    LOG_LEVEL: debug
-    LOG_FORMAT: json
-    LOG_FILE: logs/payment-service.log
-    LOG_OUTPUT: stdout
-    LOG_MAX_SIZE: 100m
-    LOG_MAX_FILES: "5"
-    LOG_COMPRESS: "true"
-
-    # Tracing Configuration
     TRACING_ENABLED: "true"
     TRACING_SAMPLING_RATE: "0.1"
     TRACING_SERVICE_NAME: payment-service
 
-    #OTP_TEMPLATE_PATH=app\internal\shared\template\activation-mail.html
-
-    # HEALTH CHECK CONFIGURATION
-    HEALTH_PORT: "8085"
-    HEALTH_PATH: /health
-    READINESS_PORT: "8085"
-    READINESS_PATH: /ready
-    LIVENESS_PORT: "8085"
-    LIVENESS_PATH: /live
-
   secretData: {}
-
   configMounts: []
 
 notification:
@@ -713,21 +643,26 @@ notification:
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/notification
     pullPolicy: IfNotPresent
-    tag: "v1.0.5"
+    tag: "v1.1.5"
 
   service:
     type: ClusterIP
-    port: 50056
     ports:
-      - name: health-port
-        port: 3006
-        targetPort: 3006
+      - name: http
+        port: 3000
+        targetPort: 3000
       - name: grpc
         port: 50056
         targetPort: 50056
       - name: websocket
         port: 4001
         targetPort: 4001
+
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    path: /metrics
+    port: http
 
   resources:
     limits:
@@ -743,25 +678,25 @@ notification:
     maxReplicas: 10
     targetCPUUtilizationPercentage: 80
 
-  livenessProbe: null
-  #   httpGet:
-  #     path: /health
-  #     port: 8086 # http
-  #   initialDelaySeconds: 30
-  #   periodSeconds: 10
+  livenessProbe:
+    httpGet:
+      path: /healthz
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
 
-  readinessProbe: null
-  #   httpGet:
-  #     path: /health
-  #     port: 8086 # http
-  #   initialDelaySeconds: 5
-  #   periodSeconds: 5
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 5
 
   env:
-    NODE_ENV: "development"
+    NODE_ENV: "production"
     SERVICE_NAME: notification-service
     serviceVersion: "0.0.1"
-    API_PORT: 3006
+    HTTP_PORT: 3000
     GRPC_PORT: 50056
     WS_PORT: 4001
 
@@ -789,7 +724,6 @@ notification:
     POSTGRES_PORT: "5432"
     POSTGRES_DB: notification_service
     POSTGRES_USER: postgres
-    POSTGRES_PASSWORD: password
     POSTGRES_SSL_MODE: disable
     DB_MAX_OPEN_CONNS: "25"
     DB_MAX_IDLE_CONNS: "5"
@@ -798,22 +732,18 @@ notification:
 
     TEMPLATE_BASE_PATH: pkg/templates
 
-    # KAFKA CONFIGURATION
     KAFKA_CONSUMER_GROUP: notification-service-group
     KAFKA_WORKERS: "6"
     KAFKA_RETRIES: "3"
 
-    # SMTP CONFIGURATION
     SMTP_PORT: "587"
     SMTP_TLS_ENABLED: "true"
     SMTP_TLS_SKIP_VERIFY: "false"
     SMTP_RATE_LIMIT_RPM: "60"
     SMTP_RATE_LIMIT_BURST: "1"
 
-    # WEBSOCKET CONFIGURATION
     WS_PORT: "4001"
 
-    # gRPC CONFIGURATION
     GRPC_PORT: "50056"
     GRPC_MAX_CONCURRENT_STREAMS: "100"
     GRPC_MAX_CONNECTION_IDLE: 15s
@@ -822,38 +752,22 @@ notification:
     GRPC_TIME: 2h
     GRPC_TIMEOUT: 20s
 
-    # OpenTelemetry Jaeger Tracing
-    JAEGER_SAMPLING_RATE: "0.1"
-    JAEGER_SAMPLING_TYPE: probabilistic
-
-    # Prometheus Metrics
-    PROMETHEUS_PORT: "9091"
     PROMETHEUS_PATH: /metrics
     METRICS_ENABLED: "true"
 
-    # Logging Configuration
-    LOG_LEVEL: debug
+    LOG_LEVEL: info
     LOG_FORMAT: json
-    LOG_FILE: logs/notification-service.log
-    LOG_OUTPUT: stdout
-    LOG_MAX_SIZE: 100m
-    LOG_MAX_FILES: "5"
-    LOG_COMPRESS: "true"
 
-    # Tracing Configuration
     TRACING_ENABLED: "true"
-    TRACING_SAMPLING_RATE: "0.1"
     TRACING_SERVICE_NAME: notification-service
 
-    #OTP_TEMPLATE_PATH=app\internal\shared\template\activation-mail.html
-
-    # HEALTH CHECK CONFIGURATION
-    HEALTH_PORT: "8086"
-    HEALTH_PATH: /health
-    READINESS_PORT: "8086"
-    READINESS_PATH: /ready
-    LIVENESS_PORT: "8086"
-    LIVENESS_PATH: /live
+    # STILL OPEN: the rendered ConfigMap for this service contains
+    # POSTGRES_PASSWORD: "password" even though it's not set anywhere in
+    # this file — it's hardcoded in charts/notification/templates/configmap.yaml.
+    # Because envFrom applies configmaps after secrets, that hardcoded value
+    # silently overrides the real password pulled by the ExternalSecret.
+    # This needs a template fix (remove the key from that configmap.yaml),
+    # not a values change.
 
   secretData: {}
   configMounts: []
@@ -867,21 +781,23 @@ order:
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/order
     pullPolicy: IfNotPresent
-    tag: "v1.0.5"
+    tag: "v1.1.5"
 
   service:
     type: ClusterIP
-    port: 50054
     ports:
       - name: http
-        port: 8000
-        targetPort: 8000
+        port: 3000
+        targetPort: 3000
       - name: grpc
         port: 50054
         targetPort: 50054
-      - name: health
-        port: 3004
-        targetPort: 3004
+
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    path: /metrics
+    port: http
 
   resources:
     limits:
@@ -897,25 +813,25 @@ order:
     maxReplicas: 10
     targetCPUUtilizationPercentage: 80
 
-  livenessProbe: null
-  #   httpGet:
-  #     path: /health
-  #     port: 8080 # http
-  #   initialDelaySeconds: 30
-  #   periodSeconds: 10
+  livenessProbe:
+    httpGet:
+      path: /healthz
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
 
-  readinessProbe: null
-  #   httpGet:
-  #     path: /health
-  #     port: 8080 # http
-  #   initialDelaySeconds: 5
-  #   periodSeconds: 5
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 5
 
   env:
-    NODE_ENV: "development"
-    SERVICE_NAME: OrderService
+    NODE_ENV: "production"
+    SERVICE_NAME: order-service   # was "OrderService" — now matches naming convention
     serviceVersion: "0.0.1"
-    API_PORT: 3004
+    HTTP_PORT: 3000
     GRPC_PORT: 50054
 
   configMaps:
@@ -947,14 +863,12 @@ order:
     DB_CONN_MAX_LIFETIME: 5m
     DB_CONN_MAX_IDLE_TIME: 5m
 
-    # KAFKA CONFIGURATION
     KAFKA_CLIENT_ID: order-service
     KAFKA_CONSUMER_GROUP: order-service-group
     KAFKA_MAX_POLL_RECORDS: "100"
     KAFKA_FETCH_MAX_BYTES: "5242880"
     KAFKA_SASL_ENABLED: "false"
 
-    # gRPC CONFIGURATION
     GRPC_PORT: "50054"
     GRPC_MAX_CONCURRENT_STREAMS: "100"
     GRPC_MAX_CONNECTION_IDLE: 15s
@@ -963,42 +877,12 @@ order:
     GRPC_TIME: 2h
     GRPC_TIMEOUT: 20s
 
-    # OpenTelemetry Jaeger Tracing
-    JAEGER_HOST: jaeger
-    JAEGER_PORT: "6831"
-    JAEGER_ENDPOINT: http://jaeger:4318
-    JAEGER_SAMPLING_RATE: "0.1"
-    JAEGER_SAMPLING_TYPE: probabilistic
+    LOG_LEVEL: info
 
-    # Prometheus Metrics
-    PROMETHEUS_PORT: "9091"
-    PROMETHEUS_PATH: /metrics
-    METRICS_ENABLED: "true"
-
-    # Logging Configuration
-    LOG_LEVEL: debug
-    LOG_FORMAT: json
-    LOG_FILE: logs/order-service.log
-    LOG_OUTPUT: stdout
-    LOG_MAX_SIZE: 100m
-    LOG_MAX_FILES: "5"
-    LOG_COMPRESS: "true"
-
-    # Tracing Configuration
     TRACING_ENABLED: "true"
-    TRACING_SAMPLING_RATE: "0.1"
     TRACING_SERVICE_NAME: order-service
 
-    # HEALTH CHECK CONFIGURATION
-    HEALTH_PORT: "8080"
-    HEALTH_PATH: /health
-    READINESS_PORT: "8080"
-    READINESS_PATH: /ready
-    LIVENESS_PORT: "8080"
-    LIVENESS_PATH: /live
-
   secretData: {}
-
   configMounts: []
 
 chat:
@@ -1009,18 +893,23 @@ chat:
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/chat
     pullPolicy: IfNotPresent
-    tag: "v1.0.5"
+    tag: "v1.1.5"
 
   service:
     type: ClusterIP
-    port: 50059
     ports:
       - name: grpc
         port: 50059
         targetPort: 50059
-      - name: websocket
+      - name: http
         port: 4009
         targetPort: 4009
+
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    path: /metrics
+    port: http
 
   resources:
     limits:
@@ -1036,25 +925,25 @@ chat:
     maxReplicas: 10
     targetCPUUtilizationPercentage: 80
 
-  livenessProbe: null
-  #   httpGet:
-  #     path: /health
-  #     port: 8086 # http
-  #   initialDelaySeconds: 30
-  #   periodSeconds: 10
+  livenessProbe:
+    httpGet:
+      path: /healthz
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
 
-  readinessProbe: null
-  #   httpGet:
-  #     path: /health
-  #     port: 8086 # http
-  #   initialDelaySeconds: 5
-  #   periodSeconds: 5
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 5
 
   env:
-    NODE_ENV: "development"
+    NODE_ENV: "production"
     SERVICE_NAME: chat-service
     serviceVersion: "0.0.1"
-    API_PORT: 4009
+    HTTP_PORT: 4009
     GRPC_PORT: 50059
 
   configMaps:
@@ -1085,16 +974,14 @@ chat:
     DATABASE_CONNECTION_TIMEOUT: "30000"
     DATABASE_IDLE_TIMEOUT: "10000"
 
-    # REDIS CONFIGURATION
     REDIS_DB: "0"
     REDIS_MAX_CONNECTIONS: "100"
     REDIS_MIN_CONNECTIONS: "10"
     REDIS_TTL_DEFAULT: "86400"
     REDIS_KEY_PREFIX: "edulearn:chat:"
 
-    ALLOWED_ORIGINS: "*"
+    ALLOWED_ORIGINS: "https://edulearn-client.vercel.app"   # was "*" — no reason for chat to be more permissive than the gateway
 
-    # gRPC CONFIGURATION
     GRPC_PORT: "50059"
     GRPC_MAX_CONCURRENT_STREAMS: "100"
     GRPC_MAX_CONNECTION_IDLE: 15s
@@ -1103,44 +990,20 @@ chat:
     GRPC_TIME: 2h
     GRPC_TIMEOUT: 20s
 
-    # KAFKA CONFIGURATION
     KAFKA_CLIENT_ID: chat-service
     KAFKA_CONSUMER_GROUP: chat-service-group
     KAFKA_MAX_POLL_RECORDS: "100"
     KAFKA_FETCH_MAX_BYTES: "5242880"
     KAFKA_SASL_ENABLED: "false"
 
-    # OBSERVABILITY CONFIGURATION
-
-    # OpenTelemetry Jaeger Tracing
-    JAEGER_SAMPLING_RATE: "0.1"
-    JAEGER_SAMPLING_TYPE: probabilistic
-
-    # Prometheus Metrics
-    PROMETHEUS_PATH: /metrics
+    METRICS_PATH: /metrics
     METRICS_ENABLED: "true"
 
-    # Logging Configuration
-    LOG_LEVEL: debug
+    LOG_LEVEL: info
     LOG_FORMAT: json
-    LOG_FILE: logs/chat-service.log
-    LOG_OUTPUT: stdout
-    LOG_MAX_SIZE: 100m
-    LOG_MAX_FILES: "5"
-    LOG_COMPRESS: "true"
 
-    # Tracing Configuration
     TRACING_ENABLED: "true"
-    TRACING_SAMPLING_RATE: "0.1"
     TRACING_SERVICE_NAME: chat-service
-
-    # HEALTH CHECK CONFIGURATION
-    HEALTH_PORT: "8086"
-    HEALTH_PATH: /health
-    READINESS_PORT: "8086"
-    READINESS_PATH: /ready
-    LIVENESS_PORT: "8086"
-    LIVENESS_PATH: /live
 
   configMounts: []
 
@@ -1169,18 +1032,19 @@ configData:
   AUTH_SERVICE_GRPC: edulearn-auth:50051
   USER_SERVICE_GRPC: edulearn-user:50052
   COURSE_SERVICE_GRPC: edulearn-course:50053
-  SESSION_SERVICE_GRPC: session-svc:50057
+  # SESSION_SERVICE_GRPC and ANALYTICS_SERVICE_GRPC intentionally removed —
+  # no such deployments exist in this chart; keeping dangling refs risks
+  # confusing failed lookups in the gateway. Re-add once those services
+  # exist, pointing at their real in-cluster Service DNS name.
   NOTIFICATION_SERVICE_GRPC: edulearn-notification:50056
   PAYMENT_SERVICE_GRPC: edulearn-payment:50055
   ORDER_SERVICE_GRPC: edulearn-order:50054
-  ANALYTICS_SERVICE_GRPC: localhost:50058
   CHAT_SERVICE_GRPC: edulearn-chat:50059
 
   # CORS CONFIGURATION
-  ALLOWED_ORIGINS: https://edulearn-client.vercel.app,http://localhost:9000,
+  ALLOWED_ORIGINS: https://edulearn-client.vercel.app   # removed trailing comma and the localhost:9000 dev origin
   ALLOWED_METHODS: GET,POST,PUT,DELETE,PATCH,OPTIONS
 
-  # gRPC Client Configuration
   GRPC_TIMEOUT: "30000"
   GRPC_MAX_RECEIVE_MESSAGE_LENGTH: "4194304"
   GRPC_MAX_SEND_MESSAGE_LENGTH: "4194304"
@@ -1200,25 +1064,11 @@ configData:
   KAFKA_PRODUCER_BATCH_SIZE: "16384"
   KAFKA_PRODUCER_LINGER_MS: "5"
 
-  # Loki Logging
-  LOKI_URL: http://loki:3100
-  LOKI_USERNAME: ""
-  LOKI_PASSWORD: ""
+  OTLP_ENDPOINT: http://otel-collector.observability.svc.cluster.local:4317
 
-  # Jaeger Tracing
-  JAEGER_ENDPOINT: http://jaeger:4318
-  JAEGER_HOST: jaeger
-  JAEGER_PORT: "6831"
-  JAEGER_SAMPLING_RATE: "0.1"
-  JAEGER_SAMPLING_TYPE: probabilistic
-
-  # Prometheus Metrics
-  PROMETHEUS_PORT: "9090"
-  PROMETHEUS_PATH: /metrics
-  METRICS_ENABLED: "true"
+  METRICS_PATH: /metrics
 
 secretData: {}
-
 configMounts: []
 
 redis:
@@ -1228,12 +1078,14 @@ redis:
     architecture: standalone
 
     auth:
-      enabled: false
+      enabled: true                 # was false — Redis was running fully open (ALLOW_EMPTY_PASSWORD: yes)
+      existingSecret: redis-secret  # create/populate this secret (e.g. via ExternalSecret, same pattern as postgres below) with key "redis-password"
+      existingSecretPasswordKey: redis-password
 
     master:
       persistence:
         enabled: true
-        storageClass: gp2      # or gp3 if you create it
+        storageClass: gp3
         size: 2Gi
 
     replica:
@@ -1244,15 +1096,26 @@ redis:
       save 60 1000
 
     networkPolicy:
-      enabled: false
+      enabled: true                 # was false — use Bitnami's scoped NetworkPolicy instead of relying solely on the app-level open-egress policies
+
+    image:
+      tag: "8.2.2"                  # pin instead of floating "latest" — set to whatever version you've validated
 
     metrics:
-      enabled: false
+      enabled: true
+
+      serviceMonitor:
+        enabled: true
+        namespace: monitoring
+
+        interval: 30s
+
+        labels:
+          release: kube-prometheus-stack
 
 postgres:
   enabled: true
   postgres:
-
     auth:
       existingSecret: postgres-secret
 
@@ -1263,11 +1126,10 @@ postgres:
       username: postgres
       database: edulearn
 
-      #   userKey: username
-
-      #   databaseKey: database
-
     architecture: standalone # Change to replication for HA in prod
+
+    image:
+      tag: "18.4.0"                 # pin instead of floating "latest"
 
     primary:
       persistence:
@@ -1291,14 +1153,11 @@ postgres:
 
     externalSecret:
       enabled: true
-
       targetSecretName: postgres-secret
-
       refreshInterval: 1h
 
       secretStoreRef:
         name: aws-secrets-manager
-
         kind: ClusterSecretStore
 
       data:
@@ -1318,11 +1177,22 @@ postgres:
           remoteKey: edulearn/prod/postgres
           property: database
 
+    metrics:
+      enabled: true
+
+      serviceMonitor:
+        enabled: true
+        namespace: monitoring
+
+        labels:
+          release: kube-prometheus-stack
+
+        interval: 30s
+
 kafka:
   enabled: true
 
   kafka:
-
     kraft:
       enabled: true
 
@@ -1334,7 +1204,7 @@ kafka:
 
       persistence:
         enabled: true
-        storageClass: gp2
+        storageClass: gp3
         size: 2Gi
 
     broker:
@@ -1342,7 +1212,7 @@ kafka:
 
       persistence:
         enabled: true
-        storageClass: gp2
+        storageClass: gp3
         size: 2Gi
 
     listeners:
@@ -1364,4 +1234,20 @@ kafka:
     transactionStateLogMinIsr: 1
 
     networkPolicy:
-      enabled: false
+      enabled: true                 # was false
+
+  metrics:
+    kafka:
+      enabled: true
+
+    jmx:
+      enabled: true
+
+    serviceMonitor:
+      enabled: true
+      namespace: monitoring
+
+      labels:
+        release: kube-prometheus-stack
+
+      interval: 30s

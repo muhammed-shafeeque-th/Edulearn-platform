@@ -1,0 +1,6 @@
+aws_region: ap-south-1
+
+cluster_name: edulearn-cluster
+
+aws_profile: default
+

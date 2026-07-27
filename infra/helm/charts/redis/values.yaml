@@ -9,8 +9,8 @@ redis:
   master:
     persistence:
       enabled: true
-      # storageClass: gp3
-      # size: 8Gi
+      storageClass: gp3
+      size: 2Gi
 
     resources:
       requests:
