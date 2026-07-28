@@ -2,9 +2,9 @@ apiVersion: v2
 name: course
 description: Course service of EduLearn
 type: application
-version: 1.0.2
-appVersion: "1.0.2"
+version: 1.0.4
+appVersion: "1.0.4"
 dependencies:
   - name: edulearn-common
-    version: 1.0.1
+    version: 1.1.0
     repository: file://../../../edulearn-common
