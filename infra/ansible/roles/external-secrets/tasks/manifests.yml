@@ -1,0 +1,24 @@
+- name: Create manifest directory
+  become: true
+  file:
+    path: /tmp/external-secrets
+    state: directory
+
+- name: Render manifests
+  become: true
+  template:
+    src: "{{ item.src }}"
+    dest: "/tmp/external-secrets/{{ item.dest }}"
+  loop:
+    - src: cluster-secret-store.yaml.j2
+      dest: cluster-secret-store.yaml
+    # - src: external-secret.yaml.j2
+    #   dest: external-secret.yaml
+
+- name: Apply manifests
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ item }}"
+  loop:
+    - /tmp/external-secrets/cluster-secret-store.yaml
+    # - /tmp/external-secrets/external-secret.yaml

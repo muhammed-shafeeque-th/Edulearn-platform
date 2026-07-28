@@ -1,0 +1,17 @@
+external_secrets_namespace: external-secrets
+
+external_secrets_release: external-secrets
+
+external_secrets_sa: external-secrets
+
+external_secrets_role_name: external-secrets-pod-identity-role
+
+external_secrets_policy_name: ExternalSecretsManagerRead
+
+external_secrets_chart_version: "0.15.0"
+
+external_secrets_install_crds: true
+
+secret_store_name: aws-secrets-manager
+
+aws_secrets_region: "{{ aws_region }}"
