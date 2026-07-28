@@ -75,3 +75,16 @@ configData: {}
 secretData: {}
 
 configMounts: []
+
+serviceMonitor:
+  enabled: true
+
+  namespace: observability
+
+  portName: metrics
+
+  path: /metrics
+
+  interval: 30s
+
+  scrapeTimeout: 10s
