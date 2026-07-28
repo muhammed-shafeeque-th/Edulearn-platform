@@ -1,0 +1,15 @@
+- name: Wait for External Secrets controller
+  command: kubectl rollout status deployment/external-secrets -n external-secrets
+  changed_when: false
+
+- name: Verify ExternalSecret
+  command: kubectl get externalsecret -n edulearn
+  changed_when: false
+
+# - name: Verify generated Secret
+#   command: kubectl get secret edulearn-secrets -n edulearn
+#   changed_when: false
+
+# - name: Verify application pods
+#   command: kubectl get pods -n edulearn
+#   changed_when: false
