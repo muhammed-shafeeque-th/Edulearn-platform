@@ -1,0 +1,56 @@
+- name: Install Gateway API Standard CRDs
+  kubernetes.core.k8s:
+    state: present
+    src: "https://github.com/kubernetes-sigs/gateway-api/releases/download/{{ gateway_api_version }}/standard-install.yaml"
+
+- name: Install Gateway API Experimental CRDs
+  kubernetes.core.k8s:
+    state: present
+    src: "https://github.com/kubernetes-sigs/gateway-api/releases/download/{{ gateway_api_version }}/experimental-install.yaml"
+
+- name: Install AWS Gateway CRDs
+  kubernetes.core.k8s:
+    state: present
+    src: https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/refs/heads/main/config/crd/gateway/gateway-crds.yaml
+
+- name: Create manifest directory
+  become: true
+  file:
+    path: /tmp/gateway-api
+    state: directory
+    mode: "0755"
+
+- name: Render Gateway manifests
+  become: true
+  template:
+    src: "{{ item.src }}"
+    dest: "/tmp/gateway-api/{{ item.dest }}"
+  loop:
+  - src: loadbalancerconfiguration.yaml.j2
+    dest: loadbalancerconfiguration.yaml
+  - src: gatewayclass.yaml.j2
+    dest: gatewayclass.yaml
+  - src: gateway.yaml.j2
+    dest: gateway.yaml
+
+# kubectl apply -R -f .
+- name: Apply Gateway manifests
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ item }}"
+  loop:
+  - /tmp/gateway-api/loadbalancerconfiguration.yaml
+  - /tmp/gateway-api/gatewayclass.yaml
+  - /tmp/gateway-api/gateway.yaml
+
+- name: Wait for GatewayClass
+  command: kubectl get gatewayclass
+  changed_when: false
+
+- name: Wait for Gateway
+  command: kubectl get gateway -A
+  changed_when: false
+
+- name: Verify LoadBalancerConfiguration
+  command: kubectl get loadbalancerconfiguration -A
+  changed_when: false
