@@ -12,5 +12,7 @@ locals {
     eks_cluster_endpoint = module.eks.cluster_endpoint
     cluster_name         = module.eks.cluster_name
     vpc_id               = module.network.vpc_id
+    loki_bucket          = module.loki_bucket.bucket
+    tempo_bucket         = module.tempo_bucket.bucket
   }
 }

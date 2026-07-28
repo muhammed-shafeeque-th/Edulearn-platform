@@ -36,64 +36,117 @@ module "eks" {
 
 module "aws_lbc_pod_identity" {
 
-  source = "../../modules/pod-identity"
-
-  cluster_name = module.eks.cluster_name
-
-  namespace = "kube-system"
-
+  source          = "../../modules/pod-identity"
+  cluster_name    = module.eks.cluster_name
+  namespace       = "kube-system"
   service_account = "aws-load-balancer-controller"
-
-  role_name = "aws-load-balancer-controller-role"
-
-  policy_name = "AWSLoadBalancerControllerIAMPolicy"
-
+  create_policy   = true
+  role_name       = "aws-load-balancer-controller-role"
+  policy_name     = "AWSLoadBalancerControllerIAMPolicy"
   policy_document = file("${path.module}/policies/aws-lbc-policy.json")
 }
 module "external_secret_pod_identity" {
 
-  source = "../../modules/pod-identity"
-
-  cluster_name = module.eks.cluster_name
-
-  namespace = "external-secrets"
-
+  source          = "../../modules/pod-identity"
+  cluster_name    = module.eks.cluster_name
+  namespace       = "external-secrets"
   service_account = "external-secrets"
-
-  role_name = "external-secrets-pod-identity-role"
-
-  policy_name = "ExternalSecretsManagerRead"
-
+  role_name       = "external-secrets-pod-identity-role"
+  create_policy   = true
+  policy_name     = "ExternalSecretsManagerRead"
   policy_document = file("${path.module}/policies/external-secret-policy.json")
 }
+
 module "external_dns_pod_identity" {
 
-  source = "../../modules/pod-identity"
-
-  cluster_name = module.eks.cluster_name
-
-  namespace = "external-dns"
-
+  source          = "../../modules/pod-identity"
+  cluster_name    = module.eks.cluster_name
+  namespace       = "external-dns"
   service_account = "external-dns"
-
-  role_name = "external-dns-pod-identity-role"
-
-  policy_name = "AllowExternalDNSUpdates"
-
+  role_name       = "external-dns-pod-identity-role"
+  policy_name     = "AllowExternalDNSUpdates"
+  create_policy   = true
   policy_document = file("${path.module}/policies/external-dns-policy.json")
 }
+module "loki_pod_identity" {
 
-# module "alb" {
-#   source = "../../modules/alb"
-# 
-#   cluster_name      = var.cluster_name
-#   vpc_id            = module.network.vpc_id
-#   region            = var.region
-#   oidc_provider_url = module.eks.oidc_provider_url
-#   tags              = local.tags
-# 
-# }
+  source          = "../../modules/pod-identity"
+  cluster_name    = module.eks.cluster_name
+  namespace       = "observability"
+  service_account = "loki"
+  role_name       = "loki-pod-identity-role"
+  create_policy   = true
+  policy_name     = "AllowLokiS3Access"
+  policy_document = file("${path.module}/policies/loki-policy.json")
+}
+module "tempo_pod_identity" {
 
+  source          = "../../modules/pod-identity"
+  cluster_name    = module.eks.cluster_name
+  namespace       = "observability"
+  service_account = "tempo"
+  role_name       = "tempo-pod-identity-role"
+  create_policy   = true
+  policy_name     = "AllowTempoS3Access"
+  policy_document = file("${path.module}/policies/tempo-policy.json")
+}
+
+
+
+module "ebs_csi_identity" {
+
+  source          = "../../modules/pod-identity"
+  cluster_name    = module.eks.cluster_name
+  namespace       = "kube-system"
+  service_account = "ebs-csi-controller-sa"
+  role_name       = "ebs-csi-role"
+  policy_arns = [
+    "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+  ]
+}
+
+module "loki_bucket" {
+
+  source = "../../modules/s3-bucket"
+
+  bucket = {
+    name          = "edulearn-loki"
+    force_destroy = true
+    tags = {
+      Application = "EduLearn"
+      Purpose     = "Loki Bucket"
+    }
+  }
+
+  encryption = {
+    enabled   = true
+    algorithm = "aws:kms"
+  }
+
+}
+module "tempo_bucket" {
+
+  source = "../../modules/s3-bucket"
+  bucket = {
+    name          = "edulearn-tempo"
+    force_destroy = true
+
+    tags = {
+      Application = "EduLearn"
+      Purpose     = "Tempo Bucket"
+
+    }
+  }
+
+  versioning = {
+    enabled = true
+
+  }
+  encryption = {
+    enabled   = true
+    algorithm = "aws:kms"
+  }
+}
 # Generate a key and registers it in AWS.
 
 resource "tls_private_key" "bastion_key" {
