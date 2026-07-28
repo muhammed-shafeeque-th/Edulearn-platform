@@ -1,0 +1,38 @@
+- name: Check AWS CLI
+  command: aws --version
+  register: aws_cli
+  changed_when: false
+
+- name: Check kubectl
+  command: kubectl version --client
+  register: kubectl_version
+  changed_when: false
+
+- name: Check eksctl
+  command: eksctl version
+  register: eksctl_version
+  changed_when: false
+
+- name: Verify AWS credentials
+  command: aws sts get-caller-identity
+  register: caller
+  changed_when: false
+
+- name: Get current kubectl context
+  command: kubectl config current-context
+  register: current_context
+  failed_when: false
+  changed_when: false
+
+- name: Update kubeconfig if context differs
+  command: >
+    aws eks update-kubeconfig --region {{ aws_region }} --name {{ cluster_name }}
+  when: current_context.rc != 0 or cluster_name not in current_context.stdout
+
+- name: Check Kubernetes API
+  command: kubectl cluster-info
+  changed_when: false
+
+- name: List namespaces
+  command: kubectl get ns
+  changed_when: false
