@@ -6,7 +6,7 @@ metadata:
   labels:
     {{- include "edulearn-common.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ .Values.service.type | default "ClusterIP" }}
   ports:
     {{- with .Values.service.ports }}
     {{- toYaml . | nindent 4 }}

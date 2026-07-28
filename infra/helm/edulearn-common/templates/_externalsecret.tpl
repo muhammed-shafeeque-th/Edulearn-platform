@@ -1,5 +1,5 @@
 {{- define "edulearn-common.externalsecret" -}}
-{{- if .Values.externalSecret.enabled }}
+{{- if and .Values.externalSecret (.Values.externalSecret.enabled) }}
 ---
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
