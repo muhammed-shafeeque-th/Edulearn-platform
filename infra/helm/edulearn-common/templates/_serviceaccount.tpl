@@ -13,10 +13,13 @@ kind: ServiceAccount
 metadata:
   name: {{ include "edulearn-common.serviceAccountName" . }}
   labels:
-    {{- include "edulearn-common.labels" . | nindent 4 }}
+    {{- include "edulearn-common.selectorLabels" . | nindent 4 }}
   {{- with .Values.serviceAccount.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
+# Kubernetes API, so don't mount a token they don't need.
+automountServiceAccountToken: {{ .Values.serviceAccount.automount | default false }}
 {{- end }}
 {{- end }}
+

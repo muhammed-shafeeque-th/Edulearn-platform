@@ -1,0 +1,32 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: Gateway
+
+metadata:
+  name: {{ gateway_name }}
+  namespace: {{ gateway_namespace }}
+
+spec:
+  gatewayClassName: {{ gateway_class_name }}
+
+  infrastructure:
+    parametersRef:
+      group: gateway.k8s.aws
+      kind: LoadBalancerConfiguration
+      name: app-gw-lbconfig
+
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: "{{ gateway_hostname }}"
+      allowedRoutes:
+        namespaces:
+          from: All
+
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "{{ gateway_hostname }}"
+      allowedRoutes:
+        namespaces:
+          from: All

@@ -1,4 +1,5 @@
 {{- define "edulearn-common.secret" -}}
+{{- if not (and .Values.externalSecret .Values.externalSecret.enabled) }}
 apiVersion: v1
 kind: Secret
 metadata:
@@ -11,5 +12,6 @@ data:
   {{- range $key, $value := .Values.secretData }}
   {{ $key }}: {{ $value | b64enc | quote }}
   {{- end }}
+{{- end }}
 {{- end }}
 {{- end }}

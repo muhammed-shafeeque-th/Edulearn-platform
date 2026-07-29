@@ -17,12 +17,19 @@ data "aws_iam_policy_document" "assume_role" {
         "pods.eks.amazonaws.com"
       ]
     }
+
+
   }
+
 }
 
 resource "aws_iam_role" "this" {
 
+  count = var.create_role ? 1 : 0
+
   name = var.role_name
+
+  # assume_role_policy = jsonencode({
 
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 
@@ -33,7 +40,9 @@ resource "aws_iam_role" "this" {
 
 resource "aws_iam_role_policy_attachment" "this" {
 
-  role = aws_iam_role.this.name
+  # for_each = var.create_role    ? toset(local.attached_policy_arns)    : []
+  for_each = var.create_role ? local.attached_policies : {}
 
-  policy_arn = aws_iam_policy.this.arn
+  role       = aws_iam_role.this[0].name
+  policy_arn = each.value
 }

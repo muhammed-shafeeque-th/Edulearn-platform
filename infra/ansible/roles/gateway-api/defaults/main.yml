@@ -1,0 +1,13 @@
+gateway_api_version: v1.3.0
+
+gateway_namespace: default
+
+gateway_name: app-alb-gateway
+
+gateway_class_name: aws-alb-gateway-class
+
+gateway_hostname: "*.muhammedshafeeque.online"
+
+certificate_arn: ""
+
+gateway_scheme: internet-facing
