@@ -1,0 +1,19 @@
+---
+- name: Create observability namespace
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ tempo_namespace }}"
+
+- name: Add Grafana Helm repository
+  kubernetes.core.helm_repository:
+    name: grafana
+    repo_url: "{{ tempo_chart_repo }}"
+
+- name: Render values
+  ansible.builtin.template:
+    src: values.yaml.j2
+    dest: /tmp/tempo-values.yaml

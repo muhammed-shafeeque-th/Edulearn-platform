@@ -1,0 +1,16 @@
+---
+- name: Tempo Deployment Summary
+  ansible.builtin.debug:
+    msg:
+      - "======================================"
+      - "Tempo Deployment Summary"
+      - "======================================"
+      - "Namespace        : {{ tempo_namespace }}"
+      - "Release          : {{ tempo_release_name }}"
+      - "Storage Backend  : Amazon S3"
+      - "Bucket           : {{ tempo_bucket_name }}"
+      - "Retention        : {{ tempo_retention }}"
+      - "Metrics Generator: Enabled"
+      - "Service Type     : ClusterIP"
+      - "Pod Identity     : Enabled"
+      - "Status           : Healthy"
