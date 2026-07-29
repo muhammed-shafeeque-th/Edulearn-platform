@@ -1,0 +1,19 @@
+---
+- name: Deploy Infrastructure
+  hosts: dev
+  gather_facts: true
+
+  roles:
+    - role: aws-lbc
+      become: false
+    - role: gateway-api
+      become: false
+    - role: external-dns
+      become: false
+    - role: external-secrets
+      become: false
+    - role: ebs-csi
+      become: false
+
+    # - role: cert-manager
+    #   when: cert_manager_enabled | default(false)

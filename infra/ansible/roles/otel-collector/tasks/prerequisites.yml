@@ -1,0 +1,26 @@
+---
+- name: Create observability namespace
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ otel_namespace }}"
+
+- name: Add OpenTelemetry Helm repository
+  kubernetes.core.helm_repository:
+    name: open-telemetry
+    repo_url: "{{ otel_chart_repo }}"
+
+- name: Update Helm repositories
+  ansible.builtin.command:
+    cmd: helm repo update
+  changed_when: false
+
+- name: Render values.yaml
+  become: true
+  ansible.builtin.template:
+    src: values.yaml.j2
+    dest: /tmp/otel-collector-values.yaml
+    mode: "0644"

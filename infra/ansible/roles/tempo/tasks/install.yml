@@ -1,0 +1,13 @@
+---
+- name: Install Tempo
+  kubernetes.core.helm:
+    name: "{{ tempo_release_name }}"
+    chart_ref: "{{ tempo_chart_name }}"
+    chart_version: "{{ tempo_chart_version }}"
+    release_namespace: "{{ tempo_namespace }}"
+    values_files:
+      - /tmp/tempo-values.yaml
+    atomic: true
+    wait: true
+    wait_timeout: 900s
+    state: present

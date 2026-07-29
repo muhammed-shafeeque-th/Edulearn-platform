@@ -1,0 +1,20 @@
+---
+tempo_namespace: observability
+
+tempo_release_name: tempo
+
+tempo_chart_repo: https://grafana.github.io/helm-charts
+
+tempo_chart_name: grafana/tempo
+
+tempo_chart_version: "1.23.2"
+
+storage_class: gp3
+
+tempo_storage_size: 20Gi
+
+tempo_bucket_name: edulearn-tempo
+
+tempo_retention: 720h
+
+aws_region: ap-south-1

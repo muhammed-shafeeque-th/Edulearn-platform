@@ -1,0 +1,52 @@
+---
+- name: Verify DaemonSet
+  kubernetes.core.k8s_info:
+    api_version: apps/v1
+    kind: DaemonSet
+    namespace: "{{ fluentbit_namespace }}"
+    label_selectors:
+      - app.kubernetes.io/instance={{ fluentbit_release_name }}
+  register: daemonset
+  retries: 30
+  delay: 10
+  until:
+    - daemonset.resources | length > 0
+    - >
+      (daemonset.resources[0].status.numberReady | default(0))
+      ==
+      (daemonset.resources[0].status.desiredNumberScheduled | default(0))
+
+- name: Verify Pods
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Pod
+    namespace: "{{ fluentbit_namespace }}"
+    label_selectors:
+      - app.kubernetes.io/instance={{ fluentbit_release_name }}
+  register: fluentbit_pods
+
+- name: Ensure Pods Running
+  ansible.builtin.assert:
+    that:
+      - fluentbit_pods.resources | length > 0
+      - >
+        fluentbit_pods.resources
+        | map(attribute='status.phase')
+        | unique == ['Running']
+
+- name: Verify Service
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Service
+    namespace: "{{ fluentbit_namespace }}"
+    label_selectors:
+      - app.kubernetes.io/instance={{ fluentbit_release_name }}
+
+- name: Verify ServiceMonitor
+  kubernetes.core.k8s_info:
+    api_version: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    namespace: "{{ fluentbit_namespace }}"
+    label_selectors:
+      - app.kubernetes.io/instance={{ fluentbit_release_name }}
+  when: fluentbit_service_monitor_enabled

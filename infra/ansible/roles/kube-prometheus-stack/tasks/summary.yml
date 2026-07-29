@@ -1,0 +1,17 @@
+- name: Display deployment summary
+
+  ansible.builtin.debug:
+
+    msg:
+
+    - "kube-prometheus-stack installed successfully"
+
+    - "Namespace: {{ monitoring_namespace }}"
+
+    - "Release: {{ kube_prometheus_release_name }}"
+
+    - "Grafana: Ready"
+
+    - "Prometheus: Ready"
+
+    - "Alertmanager: Ready"

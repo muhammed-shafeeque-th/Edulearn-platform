@@ -1,0 +1,28 @@
+---
+- name: Install kube-prometheus-stack
+
+  kubernetes.core.helm:
+
+    name: "{{ kube_prometheus_release_name }}"
+
+    chart_ref: "{{ kube_prometheus_chart_name }}"
+
+    chart_version: "{{ kube_prometheus_chart_version }}"
+
+    release_namespace: "{{ monitoring_namespace }}"
+
+    create_namespace: false
+
+    values_files:
+
+      - /tmp/kube-prometheus-values.yaml
+
+    wait: true
+
+    wait_timeout: 900s
+
+    update_repo_cache: false
+
+    atomic: true
+
+    state: present

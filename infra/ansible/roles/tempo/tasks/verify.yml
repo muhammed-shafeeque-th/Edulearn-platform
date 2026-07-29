@@ -1,0 +1,85 @@
+---
+- name: Wait for Tempo StatefulSet
+  kubernetes.core.k8s_info:
+    api_version: apps/v1
+    kind: StatefulSet
+    namespace: "{{ tempo_namespace }}"
+    name: "{{ tempo_release_name }}"
+  register: tempo_statefulset
+  retries: 30
+  delay: 10
+  until:
+    - tempo_statefulset.resources | length > 0
+    - (tempo_statefulset.resources[0].status.readyReplicas | default(0)) >= 1
+
+- name: Verify Service
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Service
+    namespace: "{{ tempo_namespace }}"
+    name: "{{ tempo_release_name }}"
+
+- name: Verify PVC
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: PersistentVolumeClaim
+    namespace: "{{ tempo_namespace }}"
+  register: tempo_pvc
+
+- name: Ensure PVC Bound
+  ansible.builtin.assert:
+    that:
+      - tempo_pvc.resources | length > 0
+      - >
+        tempo_pvc.resources |
+        map(attribute='status.phase') |
+        unique == ['Bound']
+
+- name: Verify ServiceMonitor
+  kubernetes.core.k8s_info:
+    api_version: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    namespace: "{{ tempo_namespace }}"
+    name: "{{ tempo_release_name }}"
+
+# - name: Check Tempo readiness endpoint
+#   ansible.builtin.uri:
+#     url: "http://tempo.{{ tempo_namespace }}.svc.cluster.local:3200/ready"
+#     status_code: 200
+#   register: tempo_ready
+#   retries: 20
+#   delay: 5
+#   until: tempo_ready.status == 200
+
+# - name: Check Tempo readiness
+#   ansible.builtin.command: >
+#     kubectl exec
+#     -n {{ tempo_namespace }}
+#     {{ tempo_release_name }}-0
+#     -- wget -qO- http://localhost:3200/ready
+#   register: tempo_ready
+#   changed_when: false
+
+# - name: Ensure Tempo is ready
+#   ansible.builtin.assert:
+#     that:
+#       - "'ready' in tempo_ready.stdout | lower"
+
+- name: Wait for Tempo pod Ready
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Pod
+    namespace: "{{ tempo_namespace }}"
+    label_selectors:
+      - app.kubernetes.io/name=tempo
+  register: tempo_pods
+  retries: 30
+  delay: 10
+  until: >
+    tempo_pods.resources | length > 0 and
+    (
+      tempo_pods.resources[0].status.conditions
+      | selectattr('type', 'equalto', 'Ready')
+      | map(attribute='status')
+      | first
+    ) == "True"

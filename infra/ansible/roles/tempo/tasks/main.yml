@@ -1,0 +1,8 @@
+---
+- import_tasks: prerequisites.yml
+
+- import_tasks: install.yml
+
+- import_tasks: verify.yml
+
+- import_tasks: summary.yml

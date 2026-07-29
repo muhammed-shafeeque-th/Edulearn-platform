@@ -1,0 +1,7 @@
+---
+- name: Bootstrap Bastion Host
+  hosts: dev
+  become: true
+  roles:
+  - role: bootstrap
+    become: false

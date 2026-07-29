@@ -1,0 +1,8 @@
+---
+- name: Deploy EduLearn Applications
+  hosts: dev
+  gather_facts: true
+
+  roles:
+    # Application deploy using argocd
+    - role: argocd

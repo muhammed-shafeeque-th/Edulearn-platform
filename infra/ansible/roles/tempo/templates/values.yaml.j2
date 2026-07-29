@@ -1,0 +1,81 @@
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  labels:
+    release: kube-prometheus-stack
+
+replicas: 1
+
+service:
+  type: ClusterIP
+  labels:
+    app.kubernetes.io/component: tracing
+
+persistence:
+  enabled: true
+  storageClassName: "{{ storage_class }}"
+  size: "{{ tempo_storage_size }}"
+
+serviceAccount:
+  create: true
+  name: tempo
+
+# Pod-level security context (spec.template.spec.securityContext)
+podSecurityContext:
+  fsGroup: 10001
+
+# Container-level security context (spec.template.spec.containers[*].securityContext)
+tempo:
+  securityContext:
+    runAsUser: 10001
+    runAsGroup: 10001
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
+  retention: "{{ tempo_retention }}"
+
+  compactor:
+    compaction:
+      block_retention: "{{ tempo_retention }}"
+    working_directory: /var/tempo/compactor
+
+  storage:
+    trace:
+      backend: s3
+      s3:
+        bucket: "{{ tempo_bucket_name }}"
+        endpoint: "s3.{{ aws_region }}.amazonaws.com"
+        region: "{{ aws_region }}"
+
+  tempoConfig:
+    metricsGenerator:
+      enabled: true
+      remoteWriteUrl: "http://kube-prometheus-stack-prometheus.monitoring.svc:9090/api/v1/write"
+    overrides:
+      defaults:
+        metricsGenerator:
+          processors: ["service-graphs", "span-metrics"]
+
+    distributor:
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+            http:
+        jaeger:
+          protocols:
+            grpc:
+            thrift_binary:
+            thrift_http:
+        zipkin:
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 512Mi
+  limits:
+    cpu: 1
+    memory: 2Gi
