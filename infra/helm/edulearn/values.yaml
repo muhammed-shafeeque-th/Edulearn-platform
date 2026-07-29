@@ -1088,7 +1088,7 @@ redis:
 
     image:
       repository: bitnami/redis
-      tag: "8.0.3-debian-12-r2" 
+      tag: latest
 
     metrics:
       enabled: true
@@ -1119,7 +1119,7 @@ postgres:
 
     image:
       repository: bitnami/postgresql
-      tag: "17.5.0-debian-12-r6"
+      tag: latest
 
     primary:
       persistence:
@@ -1185,7 +1185,7 @@ kafka:
   kafka:
     image:
       repository: bitnami/kafka
-      tag: "4.0.0-debian-12-r6"
+      tag: latest
 
     kraft:
       enabled: true
