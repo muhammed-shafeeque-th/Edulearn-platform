@@ -8,7 +8,7 @@ resources:
 helmCharts:
   - name: edulearn
     repo: oci://ghcr.io/muhammed-shafeeque-th/charts
-    version: 1.0.7
+    version: 1.0.8
     releaseName: edulearn-app
     namespace: edulearn-app
     valuesFile: helm/edulearn/values.yaml
