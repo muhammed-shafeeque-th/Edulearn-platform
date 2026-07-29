@@ -32,7 +32,7 @@ api-gateway:
     enabled: true
     interval: 30s
     path: /metrics
-    port: http   # matches the fixed template key (was reading .portName, a key nothing set)
+    port: http # matches the fixed template key (was reading .portName, a key nothing set)
 
   resources:
     limits:
@@ -106,7 +106,7 @@ auth:
   enabled: true
   fullnameOverride: edulearn-auth
 
-  replicaCount: 2   # auth is a critical path, needs HA
+  replicaCount: 2 # auth is a critical path, needs HA
 
   # ADDED: pod disruption budget — with replicaCount 2, a node drain could
   # previously take both replicas down at once; this guarantees at least 1
@@ -255,7 +255,7 @@ user:
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/user
     pullPolicy: IfNotPresent
-    tag: "v1.1.6"
+    tag: "v1.1.7"
 
   service:
     type: ClusterIP
@@ -375,7 +375,7 @@ course:
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/course
     pullPolicy: IfNotPresent
-    tag: "v1.1.6"
+    tag: "v1.1.7"
 
   service:
     type: ClusterIP
@@ -492,7 +492,7 @@ payment:
   enabled: true
   fullnameOverride: edulearn-payment
 
-  replicaCount: 2   # payment is the other critical path, needs HA
+  replicaCount: 2 # payment is the other critical path, needs HA
 
   # ADDED: same reasoning as auth — 2 replicas need a PDB or a single node
   # drain can take the whole service down.
@@ -515,7 +515,7 @@ payment:
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/payment
     pullPolicy: IfNotPresent
-    tag: "v1.1.6"
+    tag: "v1.1.7"
 
   service:
     type: ClusterIP
@@ -829,7 +829,7 @@ order:
 
   env:
     NODE_ENV: "production"
-    SERVICE_NAME: order-service   # was "OrderService" — now matches naming convention
+    SERVICE_NAME: order-service # was "OrderService" — now matches naming convention
     serviceVersion: "0.0.1"
     HTTP_PORT: 3000
     GRPC_PORT: 50054
@@ -893,7 +893,7 @@ chat:
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/chat
     pullPolicy: IfNotPresent
-    tag: "v1.1.6"
+    tag: "v1.1.7"
 
   service:
     type: ClusterIP
@@ -980,7 +980,7 @@ chat:
     REDIS_TTL_DEFAULT: "86400"
     REDIS_KEY_PREFIX: "edulearn:chat:"
 
-    ALLOWED_ORIGINS: "https://edulearn-client.vercel.app"   # was "*" — no reason for chat to be more permissive than the gateway
+    ALLOWED_ORIGINS: "https://edulearn-client.vercel.app" # was "*" — no reason for chat to be more permissive than the gateway
 
     GRPC_PORT: "50059"
     GRPC_MAX_CONCURRENT_STREAMS: "100"
@@ -1042,7 +1042,7 @@ configData:
   CHAT_SERVICE_GRPC: edulearn-chat:50059
 
   # CORS CONFIGURATION
-  ALLOWED_ORIGINS: https://edulearn-client.vercel.app   # removed trailing comma and the localhost:9000 dev origin
+  ALLOWED_ORIGINS: https://edulearn-client.vercel.app # removed trailing comma and the localhost:9000 dev origin
   ALLOWED_METHODS: GET,POST,PUT,DELETE,PATCH,OPTIONS
 
   GRPC_TIMEOUT: "30000"
@@ -1078,9 +1078,9 @@ redis:
     architecture: standalone
 
     auth:
-      enabled: true                 # was false — Redis was running fully open (ALLOW_EMPTY_PASSWORD: yes)
-      existingSecret: redis-secret  # create/populate this secret (e.g. via ExternalSecret, same pattern as postgres below) with key "redis-password"
-      existingSecretPasswordKey: redis-password
+      enabled: false # was false — Redis was running fully open (ALLOW_EMPTY_PASSWORD: yes)
+      # existingSecret: redis-secret  # create/populate this secret (e.g. via ExternalSecret, same pattern as postgres below) with key "redis-password"
+      # existingSecretPasswordKey: redis-password
 
     master:
       persistence:
@@ -1096,10 +1096,10 @@ redis:
       save 60 1000
 
     networkPolicy:
-      enabled: true                 # was false — use Bitnami's scoped NetworkPolicy instead of relying solely on the app-level open-egress policies
+      enabled: true # was false — use Bitnami's scoped NetworkPolicy instead of relying solely on the app-level open-egress policies
 
     image:
-      tag: "8.2.2"                  # pin instead of floating "latest" — set to whatever version you've validated
+      tag: "8.2.2" # pin instead of floating "latest" — set to whatever version you've validated
 
     metrics:
       enabled: true
@@ -1129,7 +1129,7 @@ postgres:
     architecture: standalone # Change to replication for HA in prod
 
     image:
-      tag: "18.4.0"                 # pin instead of floating "latest"
+      tag: "18.4.0" # pin instead of floating "latest"
 
     primary:
       persistence:
@@ -1151,31 +1151,31 @@ postgres:
         cpu: 1000m
         memory: 2Gi
 
-    externalSecret:
-      enabled: true
-      targetSecretName: postgres-secret
-      refreshInterval: 1h
+  externalSecret:
+    enabled: true
+    targetSecretName: postgres-secret
+    refreshInterval: 1h
 
-      secretStoreRef:
-        name: aws-secrets-manager
-        kind: ClusterSecretStore
+    secretStoreRef:
+      name: aws-secrets-manager
+      kind: ClusterSecretStore
 
-      data:
-        - secretKey: postgres-password
-          remoteKey: edulearn/prod/postgres
-          property: postgres-password
+    data:
+      - secretKey: postgres-password
+        remoteKey: edulearn/prod/postgres
+        property: postgres-password
 
-        - secretKey: password
-          remoteKey: edulearn/prod/postgres
-          property: password
+      - secretKey: password
+        remoteKey: edulearn/prod/postgres
+        property: password
 
-        - secretKey: username
-          remoteKey: edulearn/prod/postgres
-          property: username
+      - secretKey: username
+        remoteKey: edulearn/prod/postgres
+        property: username
 
-        - secretKey: database
-          remoteKey: edulearn/prod/postgres
-          property: database
+      - secretKey: database
+        remoteKey: edulearn/prod/postgres
+        property: database
 
     metrics:
       enabled: true
@@ -1234,7 +1234,7 @@ kafka:
     transactionStateLogMinIsr: 1
 
     networkPolicy:
-      enabled: true                 # was false
+      enabled: true # was false
 
   metrics:
     kafka:
