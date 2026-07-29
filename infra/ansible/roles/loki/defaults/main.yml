@@ -1,0 +1,23 @@
+---
+
+loki_namespace: observability
+
+loki_release_name: loki
+
+loki_chart_repo: https://grafana.github.io/helm-charts
+
+loki_chart_name: grafana/loki
+
+loki_chart_version: "6.40.0"
+
+storage_class: gp3
+
+aws_region: ap-south-1
+
+loki_bucket_name: edulearn-loki
+
+loki_retention: 30d
+
+loki_replicas: 1
+
+loki_storage_size: 2Gi

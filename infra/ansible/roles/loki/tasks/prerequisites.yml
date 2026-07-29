@@ -1,0 +1,25 @@
+- name: Create observability namespace
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ loki_namespace }}"
+
+- name: Add Grafana Helm repository
+  kubernetes.core.helm_repository:
+    name: grafana
+    repo_url: "{{ loki_chart_repo }}"
+
+- name: Update Helm repositories
+  ansible.builtin.command:
+    cmd: helm repo update
+  changed_when: false
+
+- name: Render values
+  become: true
+  template:
+    src: values.yaml.j2
+    dest: /tmp/loki-values.yaml
+    mode: '0644' 

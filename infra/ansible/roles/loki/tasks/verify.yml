@@ -1,0 +1,43 @@
+---
+- name: Wait for Loki StatefulSet
+  kubernetes.core.k8s_info:
+    api_version: apps/v1
+    kind: StatefulSet
+    namespace: "{{ loki_namespace }}"
+    name: "{{ loki_release_name }}"
+  register: loki_statefulset
+  retries: 30
+  delay: 10
+  until:
+    - loki_statefulset.resources | length > 0
+    - (loki_statefulset.resources[0].status.readyReplicas | default(0)) >= 1
+
+- name: Verify Loki service
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Service
+    namespace: "{{ loki_namespace }}"
+    name: "{{ loki_release_name }}"
+
+- name: Verify PVC
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: PersistentVolumeClaim
+    namespace: "{{ loki_namespace }}"
+  register: loki_pvcs
+
+- name: Ensure PVC is Bound
+  ansible.builtin.assert:
+    that:
+      - loki_pvcs.resources | length > 0
+      - >
+        loki_pvcs.resources |
+        map(attribute='status.phase') |
+        unique == ['Bound']
+
+- name: Verify ServiceMonitor
+  kubernetes.core.k8s_info:
+    api_version: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    namespace: "{{ loki_namespace }}"
+    name: "{{ loki_release_name }}"

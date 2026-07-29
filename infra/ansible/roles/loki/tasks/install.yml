@@ -1,0 +1,14 @@
+---
+- name: Install Loki
+  kubernetes.core.helm:
+    name: "{{ loki_release_name }}"
+    chart_ref: "{{ loki_chart_name }}"
+    chart_version: "{{ loki_chart_version }}"
+    release_namespace: "{{ loki_namespace }}"
+    create_namespace: false
+    values_files:
+      - /tmp/loki-values.yaml
+    wait: true
+    wait_timeout: 400s
+    atomic: true
+    state: present

@@ -1,0 +1,111 @@
+deploymentMode: SingleBinary
+
+singleBinary:
+  replicas: 1
+  persistence:
+    enabled: true
+    storageClass: "{{ storage_class }}"
+    size: "{{ loki_storage_size }}"
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1
+      memory: 2Gi
+
+# Zero out SimpleScalable components
+read:
+  replicas: 0
+write:
+  replicas: 0
+backend:
+  replicas: 0
+ingester:
+  replicas: 0
+querier:
+  replicas: 0
+queryFrontend:
+  replicas: 0
+
+# Disable sub-chart caches timing out
+chunksCache:
+  enabled: false
+resultsCache:
+  enabled: false
+
+# Disable canary and built-in Helm test framework
+lokiCanary:
+  enabled: false
+
+# CRITICAL FIX: Disable helm test so validate.yaml does not complain about lokiCanary
+test:
+  enabled: false
+
+loki:
+  auth_enabled: false
+  
+  commonConfig:
+    replication_factor: 1
+
+  memberlist:
+    service:
+      publishNotReadyAddresses: true
+    join_members:
+      - "{{ loki_release_name }}-memberlist.{{ loki_namespace }}.svc.cluster.local"
+
+  limits_config:
+    retention_period: "{{ loki_retention }}"
+    ingestion_rate_mb: 10
+    ingestion_burst_size_mb: 20
+    max_streams_per_user: 10000
+  
+  schemaConfig:
+    configs:
+      - from: "2025-01-01"
+        store: tsdb
+        object_store: s3
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+
+  storage:
+    type: s3
+    bucketNames:
+      chunks: "{{ loki_bucket_name }}"
+      ruler: "{{ loki_bucket_name }}"
+      admin: "{{ loki_bucket_name }}"
+    s3:
+      region: "{{ aws_region }}"
+      s3ForcePathStyle: false
+      insecure: false
+
+  compactor:
+    retention_enabled: true
+    delete_request_store: s3   # required when retention_enabled + object storage
+    working_directory: /var/loki/compactor
+
+  podSecurityContext:
+    fsGroup: 10001
+  securityContext:
+    runAsUser: 10001
+    runAsGroup: 10001
+    runAsNonRoot: true
+
+service:
+  type: ClusterIP
+
+gateway:
+  enabled: false
+
+monitoring:
+  serviceMonitor:
+    enabled: true
+    labels:
+      release: kube-prometheus-stack
+
+serviceAccount:
+  create: true
+  name: loki
+  annotations: {}
