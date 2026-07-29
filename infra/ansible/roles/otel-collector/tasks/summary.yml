@@ -1,0 +1,23 @@
+---
+- name: Display OpenTelemetry Collector Summary
+  ansible.builtin.debug:
+    msg:
+      - "========================================"
+      - "OpenTelemetry Collector"
+      - "========================================"
+      - "Namespace        : {{ otel_namespace }}"
+      - "Release          : {{ otel_release_name }}"
+      - "Chart Version    : {{ otel_chart_version }}"
+      - "Deployment Mode  : {{ otel_mode }}"
+      - "Replicas         : {{ otel_replica_count }}"
+      - "Service Type     : {{ otel_service_type }}"
+      - "Service Account  : {{ otel_service_account }}"
+      - "OTLP gRPC        : {{ otel_otlp_grpc_port }}"
+      - "OTLP HTTP        : {{ otel_otlp_http_port }}"
+      - "Metrics          : {{ otel_metrics_port }}"
+      - "Health           : {{ otel_health_port }}"
+      - "Tempo Exporter   : {{ tempo_endpoint }}"
+      - "Loki Exporter    : {{ loki_endpoint }}"
+      - "ServiceMonitor   : {{ otel_service_monitor_enabled }}"
+      - "Status           : Healthy"
+      - "========================================"

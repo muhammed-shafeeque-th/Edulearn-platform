@@ -1,0 +1,23 @@
+---
+- name: Wait for OpenTelemetry Collector Deployment
+  kubernetes.core.k8s_info:
+    api_version: apps/v1
+    kind: Deployment
+    namespace: "{{ otel_namespace }}"
+    label_selectors:
+    - "app.kubernetes.io/instance={{ otel_release_name }}"
+  register: otel_deployment
+  retries: 30
+  delay: 10
+  until:
+  - otel_deployment.resources | length > 0
+  - (otel_deployment.resources[0].status.readyReplicas | default(0)) >= 1
+
+- name: Verify OpenTelemetry Collector Service
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Service
+    namespace: "{{ otel_namespace }}"
+    label_selectors:
+    - "app.kubernetes.io/instance={{ otel_release_name }}"
+  register: otel_service

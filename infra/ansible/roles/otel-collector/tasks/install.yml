@@ -1,0 +1,14 @@
+---
+- name: Install OpenTelemetry Collector
+  kubernetes.core.helm:
+    name: "{{ otel_release_name }}"
+    chart_ref: "{{ otel_chart_name }}"
+    chart_version: "{{ otel_chart_version }}"
+    release_namespace: "{{ otel_namespace }}"
+    create_namespace: false
+    values_files:
+      - /tmp/otel-collector-values.yaml
+    wait: true
+    wait_timeout: 300s
+    atomic: true
+    state: present

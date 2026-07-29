@@ -1,0 +1,158 @@
+mode: "{{ otel_mode }}"
+
+replicaCount: {{ otel_replica_count }}
+
+image:
+  repository: otel/opentelemetry-collector-contrib
+
+serviceAccount:
+  create: true
+  name: "{{ otel_service_account }}"
+
+clusterRole:
+  create: true
+  name: "{{ otel_service_account }}-clusterrole"
+
+podSecurityContext:
+  fsGroup: {{ otel_fs_group }}
+
+securityContext:
+  runAsUser: {{ otel_run_as_user }}
+  runAsGroup: {{ otel_run_as_group }}
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+
+resources:
+{{ otel_resources | to_nice_yaml(indent=2) | indent(2, true) }}
+
+service:
+  enabled: true
+  type: "{{ otel_service_type }}"
+
+serviceMonitor:
+  enabled: {{ otel_service_monitor_enabled | lower }}
+  extraLabels:
+    release: "{{ prometheus_release_label }}"
+
+ports:
+  otlp:
+    enabled: true
+    containerPort: {{ otel_otlp_grpc_port }}
+    servicePort: {{ otel_otlp_grpc_port }}
+    protocol: TCP
+  otlp-http:
+    enabled: true
+    containerPort: {{ otel_otlp_http_port }}
+    servicePort: {{ otel_otlp_http_port }}
+    protocol: TCP
+  metrics:
+    enabled: true
+    containerPort: {{ otel_metrics_port }}
+    servicePort: {{ otel_metrics_port }}
+    protocol: TCP
+
+config:
+  extensions:
+    health_check:
+      endpoint: "0.0.0.0:{{ otel_health_port }}"
+    pprof:
+      endpoint: "0.0.0.0:{{ otel_pprof_port }}"
+    zpages:
+      endpoint: "0.0.0.0:{{ otel_zpages_port }}"
+
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: "0.0.0.0:{{ otel_otlp_grpc_port }}"
+        http:
+          endpoint: "0.0.0.0:{{ otel_otlp_http_port }}"
+
+  processors:
+    memory_limiter:
+      check_interval: "{{ otel_memory_check_interval }}"
+      limit_percentage: {{ otel_memory_limit_percentage }}
+      spike_limit_percentage: {{ otel_memory_spike_limit_percentage }}
+
+    batch:
+      timeout: "{{ otel_batch_timeout }}"
+      send_batch_size: {{ otel_batch_send_batch_size }}
+
+    resourcedetection:
+      detectors:
+        - env
+        - system
+      timeout: 2s
+      override: false
+
+    k8sattributes:
+      auth_type: serviceAccount
+      passthrough: false
+      extract:
+        metadata:
+          - k8s.namespace.name
+          - k8s.pod.name
+          - k8s.pod.uid
+          - k8s.deployment.name
+          - k8s.node.name
+          - k8s.container.name
+
+  exporters:
+    debug:
+      verbosity: basic
+
+    otlp/tempo:
+      endpoint: "{{ tempo_endpoint }}"
+      tls:
+        insecure: true
+
+    loki:
+      endpoint: "{{ loki_endpoint }}"
+
+  service:
+    telemetry:
+      logs:
+        level: "{{ otel_log_level }}"
+      metrics:
+        address: "0.0.0.0:{{ otel_metrics_port }}"
+    extensions:
+      - health_check
+      - pprof
+      - zpages
+
+    pipelines:
+      traces:
+        receivers:
+          - otlp
+        processors:
+          - memory_limiter
+          - k8sattributes
+          - resourcedetection
+          - batch
+        exporters:
+          - otlp/tempo
+
+      logs:
+        receivers:
+          - otlp
+        processors:
+          - memory_limiter
+          - resourcedetection
+          - batch
+        exporters:
+          - loki
+
+      metrics:
+        receivers:
+          - otlp
+        processors:
+          - memory_limiter
+          - k8sattributes
+          - resourcedetection
+          - batch
+        exporters:
+          - debug
