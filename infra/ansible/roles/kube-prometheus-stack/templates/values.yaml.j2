@@ -1,0 +1,180 @@
+nameOverride: ""
+fullnameOverride: ""
+
+crds:
+  enabled: true
+
+defaultRules:
+  create: true
+
+prometheusOperator:
+  enabled: true
+
+  admissionWebhooks:
+    enabled: true
+
+  tls:
+    enabled: true
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+prometheus:
+  enabled: true
+
+  service:
+    type: ClusterIP
+
+  serviceMonitor:
+    selfMonitor: true
+
+  prometheusSpec:
+
+    replicas: 1
+
+    retention: "{{ prometheus_retention }}"
+    retentionSize: 90GB
+    enableRemoteWriteReceiver: true
+
+    scrapeInterval: 30s
+    evaluationInterval: 30s
+
+    walCompression: true
+
+    externalLabels:
+      cluster: edulearn-cluster
+
+    serviceMonitorSelectorNilUsesHelmValues: true
+    podMonitorSelectorNilUsesHelmValues: true
+    probeSelectorNilUsesHelmValues: true
+    ruleSelectorNilUsesHelmValues: true
+
+    tsdb:
+      outOfOrderTimeWindow: 30m
+
+    securityContext:
+      runAsUser: 65534
+      runAsGroup: 65534
+      fsGroup: 65534
+      runAsNonRoot: true
+
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: "{{ storage_class }}"
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: "{{ prometheus_storage_size }}"
+
+    resources:
+      requests:
+        cpu: 500m
+        memory: 2Gi
+      limits:
+        cpu: "2"
+        memory: 4Gi
+
+alertmanager:
+  enabled: true
+
+  service:
+    type: ClusterIP
+
+  alertmanagerSpec:
+
+    replicas: 1
+    configSecret: "{{alertmanager_secret_name}}"
+
+    securityContext:
+      runAsUser: 65534
+      runAsGroup: 65534
+      fsGroup: 65534
+      runAsNonRoot: true
+
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: "{{ storage_class }}"
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: "{{ alertmanager_storage_size }}"
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+grafana:
+  enabled: true
+
+  service:
+    type: ClusterIP
+
+  ingress:
+    enabled: false
+
+  persistence:
+    enabled: true
+    storageClassName: "{{ storage_class }}"
+    size: "{{ grafana_storage_size }}"
+
+  adminUser: "{{ grafana_admin_user }}"
+  adminPassword: "{{ grafana_admin_password }}"
+
+  sidecar:
+    dashboards:
+      enabled: true
+      searchNamespace: ALL
+    datasources:
+      enabled: true
+
+  grafana.ini:
+    users:
+      default_theme: dark
+
+    date_formats:
+      default_timezone: UTC
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+
+prometheus-node-exporter:
+  enabled: true
+
+kube-state-metrics:
+  enabled: true
+
+kubelet:
+  enabled: true
+
+coreDns:
+  enabled: true
+
+kubeProxy:
+  enabled: true
+
+kubeApiServer:
+  enabled: true
+
+kubeScheduler:
+  enabled: false
+
+kubeControllerManager:
+  enabled: false

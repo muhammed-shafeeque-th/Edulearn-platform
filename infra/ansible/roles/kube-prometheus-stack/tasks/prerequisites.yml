@@ -1,0 +1,34 @@
+---
+- name: Create monitoring namespace
+  kubernetes.core.k8s:
+    state: present
+
+    definition:
+
+      apiVersion: v1
+
+      kind: Namespace
+
+      metadata:
+        name: "{{ monitoring_namespace }}"
+
+- name: Add Prometheus Community Helm repository
+  kubernetes.core.helm_repository:
+    name: prometheus-community
+
+    repo_url: "{{ kube_prometheus_chart_repo }}"
+
+- name: Update Helm repositories
+  ansible.builtin.command:
+
+    cmd: helm repo update
+
+  changed_when: false
+
+- name: Render values.yaml
+  become: true
+  ansible.builtin.template:
+    src: values.yaml.j2
+    dest: /tmp/kube-prometheus-values.yaml
+    mode: "0644"
+

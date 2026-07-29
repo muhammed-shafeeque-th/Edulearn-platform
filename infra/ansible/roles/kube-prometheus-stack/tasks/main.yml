@@ -1,0 +1,15 @@
+---
+- name: Install prerequisites
+  ansible.builtin.import_tasks: prerequisites.yml
+
+- name: Install metrics-server
+  ansible.builtin.import_tasks: metrics-server.yml
+
+- name: Install kube-prometheus-stack
+  ansible.builtin.import_tasks: install.yml
+
+- name: Verify deployment
+  ansible.builtin.import_tasks: verify.yml
+
+- name: Deployment summary
+  ansible.builtin.import_tasks: summary.yml

@@ -1,0 +1,48 @@
+---
+# Namespace
+monitoring_namespace: monitoring
+
+# Helm
+kube_prometheus_release_name: kube-prometheus-stack
+kube_prometheus_chart_repo: https://prometheus-community.github.io/helm-charts
+kube_prometheus_chart_name: prometheus-community/kube-prometheus-stack
+kube_prometheus_chart_version: "77.5.0"
+
+# Storage
+storage_class: gp3
+grafana_storage_size: 4Gi
+prometheus_storage_size: 10Gi
+alertmanager_storage_size: 4Gi
+
+# Retention
+prometheus_retention: 30d
+
+# Resources
+grafana_resources:
+  requests:
+    cpu: 200m
+    memory: 512Mi
+  limits:
+    cpu: 1
+    memory: 1Gi
+
+prometheus_resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 2
+    memory: 2Gi
+
+alertmanager_resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# Grafana
+grafana_hostname: grafana.{{base_domain}}
+grafana_admin_user: admin
+grafana_admin_password: change-me
