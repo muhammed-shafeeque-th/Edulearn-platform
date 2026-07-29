@@ -1,0 +1,25 @@
+---
+- name: Install Fluent Bit
+  kubernetes.core.helm:
+
+    name: "{{ fluentbit_release_name }}"
+
+    chart_ref: "{{ fluentbit_chart_name }}"
+
+    chart_version: "{{ fluentbit_chart_version }}"
+
+    release_namespace: "{{ fluentbit_namespace }}"
+
+    create_namespace: false
+
+    values_files:
+
+      - /tmp/fluent-bit-values.yaml
+
+    wait: true
+
+    wait_timeout: 300s
+
+    atomic: true
+
+    state: present

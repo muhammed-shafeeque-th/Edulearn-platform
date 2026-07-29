@@ -1,0 +1,16 @@
+---
+- name: Fluent Bit Deployment Summary
+  ansible.builtin.debug:
+    msg:
+      - "========================================"
+      - "Fluent Bit"
+      - "========================================"
+      - "Namespace       : {{ fluentbit_namespace }}"
+      - "Release         : {{ fluentbit_release_name }}"
+      - "Chart Version   : {{ fluentbit_chart_version }}"
+      - "Deployment      : DaemonSet"
+      - "Collector       : {{ otel_collector_host }}"
+      - "OTLP Port       : {{ otel_collector_otlp_port }}"
+      - "ServiceMonitor  : {{ fluentbit_service_monitor_enabled }}"
+      - "Status          : Healthy"
+      - "========================================"
