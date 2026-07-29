@@ -1098,8 +1098,8 @@ redis:
     networkPolicy:
       enabled: true # was false — use Bitnami's scoped NetworkPolicy instead of relying solely on the app-level open-egress policies
 
-    image:
-      tag: "8.2.2" # pin instead of floating "latest" — set to whatever version you've validated
+    # image:
+    #   tag: "8.2.2" # pin instead of floating "latest" — set to whatever version you've validated
 
     metrics:
       enabled: true
@@ -1128,8 +1128,8 @@ postgres:
 
     architecture: standalone # Change to replication for HA in prod
 
-    image:
-      tag: "18.4.0" # pin instead of floating "latest"
+    # image:
+    #   tag: "18.4.0" # pin instead of floating "latest"
 
     primary:
       persistence:
@@ -1153,7 +1153,7 @@ postgres:
 
   externalSecret:
     enabled: true
-    targetSecretName: postgres-secret
+    targetSecretName: postgres
     refreshInterval: 1h
 
     secretStoreRef:
