@@ -1086,8 +1086,9 @@ redis:
     networkPolicy:
       enabled: true # was false — use Bitnami's scoped NetworkPolicy instead of relying solely on the app-level open-egress policies
 
-    # image:
-    #   tag: "8.2.2" # pin instead of floating "latest" 
+    image:
+      repository: bitnami/redis
+      tag: "8.0.3-debian-12-r2" 
 
     metrics:
       enabled: true
@@ -1116,8 +1117,9 @@ postgres:
 
     architecture: standalone # Change to replication for HA in prod
 
-    # image:
-    #   tag: "18.4.0" # pin instead of floating "latest"
+    image:
+      repository: bitnami/postgresql
+      tag: "17.5.0-debian-12-r6"
 
     primary:
       persistence:
@@ -1181,6 +1183,10 @@ kafka:
   enabled: true
 
   kafka:
+    image:
+      repository: bitnami/kafka
+      tag: "4.0.0-debian-12-r6"
+
     kraft:
       enabled: true
 
