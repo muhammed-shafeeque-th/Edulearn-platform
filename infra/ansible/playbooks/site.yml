@@ -1,0 +1,10 @@
+---
+- import_playbook: bootstrap.yml
+
+- import_playbook: infrastructure.yml
+
+- import_playbook: observability.yml
+
+- import_playbook: applications.yml
+
+- import_playbook: verify.yml

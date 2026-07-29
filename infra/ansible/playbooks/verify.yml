@@ -1,0 +1,35 @@
+---
+- name: Verify Platform
+  hosts: dev
+
+  tasks:
+
+    - name: Verify Prometheus
+      import_role:
+        name: kube-prometheus-stack
+        tasks_from: verify
+
+    - name: Verify Loki
+      import_role:
+        name: loki
+        tasks_from: verify
+
+    - name: Verify Tempo
+      import_role:
+        name: tempo
+        tasks_from: verify
+
+    - name: Verify OTEL Collector
+      import_role:
+        name: otel-collector
+        tasks_from: verify
+
+    - name: Verify Fluent Bit
+      import_role:
+        name: fluent-bit
+        tasks_from: verify
+
+    - name: Verify Grafana
+      import_role:
+        name: grafana
+        tasks_from: verify

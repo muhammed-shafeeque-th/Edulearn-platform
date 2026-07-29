@@ -1,0 +1,40 @@
+---
+- name: Deploy EduLearn Observability Stack
+  hosts: dev
+  gather_facts: true
+
+  roles:
+      # Metrics  
+    - role: kube-prometheus-stack
+      tags:
+        - monitoring
+        - prometheus
+        - grafana
+        - alertmanager
+
+        # Logging    
+    - role: loki
+      tags:
+        - logging
+        - loki
+
+        # Tracing
+    - role: tempo
+      tags:
+        - tracing
+        - tempo
+
+        # OTEL
+    - role: otel-collector
+      tags:
+        - otel
+
+        # Log Forwarder
+    - role: fluent-bit
+      tags:
+        - fluentbit
+
+        # Grafana Configuration
+    - role: grafana
+      tags:
+        - grafana
