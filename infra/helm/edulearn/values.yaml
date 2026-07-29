@@ -32,7 +32,7 @@ api-gateway:
     enabled: true
     interval: 30s
     path: /metrics
-    port: http # matches the fixed template key (was reading .portName, a key nothing set)
+    port: http 
 
   resources:
     limits:
@@ -328,7 +328,7 @@ user:
           key: edulearn/prod/user
 
   configData:
-    DATABASE_HOST: postgres
+    DATABASE_HOST: edulearn-app-postgresql
     DATABASE_PORT: "5432"
     DATABASE_NAME: user_service
     DATABASE_SSL_MODE: disable
@@ -448,7 +448,7 @@ course:
           key: edulearn/prod/course
 
   configData:
-    DATABASE_HOST: "postgres"
+    DATABASE_HOST: "edulearn-app-postgresql"
     DATABASE_PORT: "5432"
     DATABASE_NAME: course_service
     DATABASE_MAX_CONNECTIONS: "50"
@@ -761,14 +761,6 @@ notification:
     TRACING_ENABLED: "true"
     TRACING_SERVICE_NAME: notification-service
 
-    # STILL OPEN: the rendered ConfigMap for this service contains
-    # POSTGRES_PASSWORD: "password" even though it's not set anywhere in
-    # this file — it's hardcoded in charts/notification/templates/configmap.yaml.
-    # Because envFrom applies configmaps after secrets, that hardcoded value
-    # silently overrides the real password pulled by the ExternalSecret.
-    # This needs a template fix (remove the key from that configmap.yaml),
-    # not a values change.
-
   secretData: {}
   configMounts: []
 
@@ -829,7 +821,7 @@ order:
 
   env:
     NODE_ENV: "production"
-    SERVICE_NAME: order-service # was "OrderService" — now matches naming convention
+    SERVICE_NAME: OrderService # was "OrderService" — now matches naming convention
     serviceVersion: "0.0.1"
     HTTP_PORT: 3000
     GRPC_PORT: 50054
@@ -966,7 +958,7 @@ chat:
           key: edulearn/prod/chat
 
   configData:
-    DATABASE_HOST: "postgres"
+    DATABASE_HOST: "edulearn-app-postgresql"
     DATABASE_PORT: "5432"
     DATABASE_NAME: chat_service
     DATABASE_MAX_CONNECTIONS: "50"
@@ -980,7 +972,7 @@ chat:
     REDIS_TTL_DEFAULT: "86400"
     REDIS_KEY_PREFIX: "edulearn:chat:"
 
-    ALLOWED_ORIGINS: "https://edulearn-client.vercel.app" # was "*" — no reason for chat to be more permissive than the gateway
+    ALLOWED_ORIGINS: "https://edulearn-client.vercel.app" 
 
     GRPC_PORT: "50059"
     GRPC_MAX_CONCURRENT_STREAMS: "100"
@@ -1020,8 +1012,8 @@ externalSecret:
         key: edulearn/prod/common
 
 configData:
-  REDIS_URL: redis://redis:6379
-  REDIS_HOST: redis
+  REDIS_URL: redis://edulearn-app-redis-master:6379
+  REDIS_HOST: edulearn-app-redis-master
   REDIS_PORT: "6379"
   REDIS_LAZY_CONNECT: "true"
   REDIS_DB: "0"
@@ -1032,17 +1024,13 @@ configData:
   AUTH_SERVICE_GRPC: edulearn-auth:50051
   USER_SERVICE_GRPC: edulearn-user:50052
   COURSE_SERVICE_GRPC: edulearn-course:50053
-  # SESSION_SERVICE_GRPC and ANALYTICS_SERVICE_GRPC intentionally removed —
-  # no such deployments exist in this chart; keeping dangling refs risks
-  # confusing failed lookups in the gateway. Re-add once those services
-  # exist, pointing at their real in-cluster Service DNS name.
   NOTIFICATION_SERVICE_GRPC: edulearn-notification:50056
   PAYMENT_SERVICE_GRPC: edulearn-payment:50055
   ORDER_SERVICE_GRPC: edulearn-order:50054
   CHAT_SERVICE_GRPC: edulearn-chat:50059
 
   # CORS CONFIGURATION
-  ALLOWED_ORIGINS: https://edulearn-client.vercel.app # removed trailing comma and the localhost:9000 dev origin
+  ALLOWED_ORIGINS: https://edulearn-client.vercel.app 
   ALLOWED_METHODS: GET,POST,PUT,DELETE,PATCH,OPTIONS
 
   GRPC_TIMEOUT: "30000"
@@ -1052,8 +1040,8 @@ configData:
   GRPC_KEEPALIVE_TIMEOUT: "5000"
   GRPC_KEEPALIVE_PERMIT_WITHOUT_CALLS: "true"
 
-  KAFKA_BROKERS: kafka:9092
-  KAFKA_BROKER: kafka:9092
+  KAFKA_BROKERS: edulearn-app-kafka:9092
+  KAFKA_BROKER: edulearn-app-kafka:9092
   KAFKA_SSL: "false"
   KAFKA_SASL_USERNAME: ""
   KAFKA_SASL_PASSWORD: ""
@@ -1099,7 +1087,7 @@ redis:
       enabled: true # was false — use Bitnami's scoped NetworkPolicy instead of relying solely on the app-level open-egress policies
 
     # image:
-    #   tag: "8.2.2" # pin instead of floating "latest" — set to whatever version you've validated
+    #   tag: "8.2.2" # pin instead of floating "latest" 
 
     metrics:
       enabled: true
@@ -1234,7 +1222,7 @@ kafka:
     transactionStateLogMinIsr: 1
 
     networkPolicy:
-      enabled: true # was false
+      enabled: true # false
 
   metrics:
     kafka:
