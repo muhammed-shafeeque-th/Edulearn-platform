@@ -32,7 +32,7 @@ api-gateway:
     enabled: true
     interval: 30s
     path: /metrics
-    port: http 
+    port: http
 
   resources:
     limits:
@@ -811,6 +811,10 @@ order:
       port: http
     initialDelaySeconds: 30
     periodSeconds: 10
+    # initialDelaySeconds: 15  # Gives the app 15 seconds to warm up
+    # periodSeconds: 10        # Checks every 10 seconds
+    timeoutSeconds: 2 # App must reply within 2 seconds
+    failureThreshold: 3 # Restarts the container after 3 consecutive failures
 
   readinessProbe:
     httpGet:
@@ -818,6 +822,9 @@ order:
       port: http
     initialDelaySeconds: 5
     periodSeconds: 5
+    # initialDelaySeconds: 10  # Waits 10 seconds before checking readiness
+    # periodSeconds: 5         # Checks every 5 seconds
+    failureThreshold: 2 # Removes from service after 2 failures
 
   env:
     NODE_ENV: "production"
@@ -972,7 +979,7 @@ chat:
     REDIS_TTL_DEFAULT: "86400"
     REDIS_KEY_PREFIX: "edulearn:chat:"
 
-    ALLOWED_ORIGINS: "https://edulearn-client.vercel.app" 
+    ALLOWED_ORIGINS: "https://edulearn-client.vercel.app"
 
     GRPC_PORT: "50059"
     GRPC_MAX_CONCURRENT_STREAMS: "100"
@@ -1030,7 +1037,7 @@ configData:
   CHAT_SERVICE_GRPC: edulearn-chat:50059
 
   # CORS CONFIGURATION
-  ALLOWED_ORIGINS: https://edulearn-client.vercel.app 
+  ALLOWED_ORIGINS: https://edulearn-client.vercel.app
   ALLOWED_METHODS: GET,POST,PUT,DELETE,PATCH,OPTIONS
 
   GRPC_TIMEOUT: "30000"
@@ -1184,8 +1191,9 @@ kafka:
 
   kafka:
     image:
-      repository: bitnami/kafka
-      tag: latest
+      registry: docker.io
+      repository: bitnamilegacy/kafka
+      tag: 4.0.0-debian-12-r10
 
     kraft:
       enabled: true
