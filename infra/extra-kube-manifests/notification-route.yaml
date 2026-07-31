@@ -1,0 +1,23 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: notification-ws-route
+  namespace: edulearn-app
+spec:
+  hostnames:
+    - api.muhammedshafeeque.online
+  parentRefs:
+    - name: app-alb-gateway
+      namespace: default
+      sectionName: http
+    - name: app-alb-gateway
+      namespace: default
+      sectionName: https
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /notifications
+      backendRefs:
+        - name: edulearn-notification
+          port: 4001

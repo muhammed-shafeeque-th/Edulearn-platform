@@ -1,0 +1,10 @@
+apiVersion: gateway.k8s.aws/v1beta1
+kind: TargetGroupConfiguration
+metadata:
+  name: chat-tg-config
+  namespace: edulearn-app
+spec:
+  targetReference:
+    name: edulearn-chat
+  defaultConfiguration:
+    targetType: ip

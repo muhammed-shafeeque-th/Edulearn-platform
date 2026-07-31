@@ -1,0 +1,23 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: chat-ws-route
+  namespace: edulearn-app
+spec:
+  hostnames:
+    - api.muhammedshafeeque.online
+  parentRefs:
+    - name: app-alb-gateway
+      namespace: default
+      sectionName: http
+    - name: app-alb-gateway
+      namespace: default
+      sectionName: https
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /chat
+      backendRefs:
+        - name: edulearn-chat
+          port: 3000
