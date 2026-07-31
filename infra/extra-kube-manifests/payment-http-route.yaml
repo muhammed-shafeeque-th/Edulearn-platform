@@ -1,0 +1,27 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: payment-webhook-route
+  namespace: edulearn-app
+spec:
+  hostnames:
+    - app.muhammedshafeeque.online
+
+  parentRefs:
+    - name: app-alb-gateway
+      namespace: default
+      sectionName: http
+
+    - name: app-alb-gateway
+      namespace: default
+      sectionName: https
+
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/webhooks
+
+      backendRefs:
+        - name: edulearn-app-payment
+          port: 3000
