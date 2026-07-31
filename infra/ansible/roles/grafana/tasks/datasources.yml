@@ -1,0 +1,21 @@
+---
+- name: Deploy Grafana Datasources
+  kubernetes.core.k8s:
+    state: present
+    template: datasources.yaml.j2
+  register: datasource_cm
+
+- name: Restart Grafana
+  kubernetes.core.k8s:
+    state: patched
+    api_version: apps/v1
+    kind: Deployment
+    namespace: "{{ grafana_namespace }}"
+    name: "{{ grafana_deployment }}"
+    definition:
+      spec:
+        template:
+          metadata:
+            annotations:
+              restartedAt: "{{ ansible_date_time.iso8601 }}"
+  when: datasource_cm.changed

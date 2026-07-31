@@ -1,0 +1,36 @@
+---
+- name: Wait for Grafana Deployment
+  kubernetes.core.k8s_info:
+    api_version: apps/v1
+    kind: Deployment
+    namespace: "{{ grafana_namespace }}"
+    name: "{{ grafana_deployment }}"
+  register: grafana
+
+  retries: 30
+  delay: 10
+
+  until:
+    - grafana.resources | length > 0
+    - (grafana.resources[0].status.readyReplicas | default(0)) >= 1
+
+- name: Verify Datasource ConfigMap
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: ConfigMap
+    namespace: "{{ grafana_namespace }}"
+    name: grafana-datasources
+
+- name: Verify Dashboard Provider
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: ConfigMap
+    namespace: "{{ grafana_namespace }}"
+    name: grafana-dashboard-provider
+
+- name: Verify HTTPRoute
+  kubernetes.core.k8s_info:
+    api_version: gateway.networking.k8s.io/v1
+    kind: HTTPRoute
+    namespace: "{{ grafana_namespace }}"
+    name: grafana

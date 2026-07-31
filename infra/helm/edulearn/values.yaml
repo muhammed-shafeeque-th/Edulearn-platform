@@ -1029,13 +1029,13 @@ configData:
   REDIS_MIN_CONNECTIONS: "10"
   REDIS_TTL: "3600"
 
-  AUTH_SERVICE_GRPC: edulearn-app-auth:50051
-  USER_SERVICE_GRPC: edulearn-app-user:50052
-  COURSE_SERVICE_GRPC: edulearn-app-course:50053
-  NOTIFICATION_SERVICE_GRPC: edulearn-app-notification:50056
-  PAYMENT_SERVICE_GRPC: edulearn-app-payment:50055
-  ORDER_SERVICE_GRPC: edulearn-app-order:50054
-  CHAT_SERVICE_GRPC: edulearn-app-chat:50059
+  AUTH_SERVICE_GRPC: edulearn-auth:50051
+  USER_SERVICE_GRPC: edulearn-user:50052
+  COURSE_SERVICE_GRPC: edulearn-course:50053
+  NOTIFICATION_SERVICE_GRPC: edulearn-notification:50056
+  PAYMENT_SERVICE_GRPC: edulearn-payment:50055
+  ORDER_SERVICE_GRPC: edulearn-order:50054
+  CHAT_SERVICE_GRPC: edulearn-chat:50059
 
   # CORS CONFIGURATION
   ALLOWED_ORIGINS: https://edulearn-client.vercel.app

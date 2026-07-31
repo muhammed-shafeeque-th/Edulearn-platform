@@ -1,0 +1,14 @@
+---
+- name: Grafana Summary
+  ansible.builtin.debug:
+    msg:
+      - "========================================"
+      - "Grafana Configuration"
+      - "========================================"
+      - "Namespace      : {{ grafana_namespace }}"
+      - "Datasource     : Prometheus"
+      - "Datasource     : Loki"
+      - "Datasource     : Tempo"
+      - "Gateway API    : Enabled"
+      - "Status         : Ready"
+      - "========================================"
