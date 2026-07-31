@@ -1,0 +1,10 @@
+apiVersion: gateway.k8s.aws/v1beta1
+kind: TargetGroupConfiguration
+metadata:
+  name: payment-tg-config
+  namespace: edulearn-app
+spec:
+  targetReference:
+    name: edulearn-app-payment
+  defaultConfiguration:
+    targetType: ip
