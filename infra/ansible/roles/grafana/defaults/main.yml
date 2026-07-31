@@ -1,0 +1,48 @@
+---
+grafana_namespace: monitoring
+
+grafana_service: kube-prometheus-stack-grafana
+
+grafana_hostname: grafana.{{ base_domain }}
+
+grafana_admin_secret: kube-prometheus-stack-grafana
+
+# Datasources
+
+prometheus_url: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+
+loki_url: http://loki.observability.svc.cluster.local:3100
+
+tempo_url: http://tempo.observability.svc.cluster.local:3200
+
+# Dashboard
+
+grafana_dashboard_path: /var/lib/grafana/dashboards
+
+grafana_provider_name: edulearn
+
+grafana_deployment: kube-prometheus-stack-grafana
+
+# Gateway
+
+gateway_namespace: default
+
+gateway_name: app-alb-gateway
+
+# Slack
+
+slack_webhook_url: "{{vault_slack_webhook_url}}"
+
+slack_channel: "#edulearn-alerts"
+
+slack_username: "Alertmanager"
+
+slack_icon_emoji: ":warning:"
+
+# Alertmanager
+
+alertmanager_namespace: monitoring
+
+# alertmanager_secret_name: alertmanager-slack
+
+alertmanager_config_name: alertmanager-config

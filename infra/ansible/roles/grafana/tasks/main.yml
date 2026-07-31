@@ -1,0 +1,12 @@
+---
+- import_tasks: datasources.yml
+
+- import_tasks: dashboards.yml
+
+- import_tasks: gateway.yml
+
+- import_tasks: alertmanager.yml
+
+- import_tasks: verify.yml
+
+- import_tasks: summary.yml

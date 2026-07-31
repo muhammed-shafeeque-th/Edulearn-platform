@@ -1,0 +1,5 @@
+---
+- name: Deploy Dashboard Provider
+  kubernetes.core.k8s:
+    state: present
+    template: dashboard-provider.yaml.j2

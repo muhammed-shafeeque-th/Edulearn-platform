@@ -1,0 +1,19 @@
+---
+- name: Deploy Alertmanager Secret
+  kubernetes.core.k8s:
+    state: present
+    template: alertmanager-secret.yaml.j2
+
+- name: Restart Alertmanager
+  kubernetes.core.k8s:
+    state: patched
+    api_version: apps/v1
+    kind: StatefulSet
+    namespace: "{{ alertmanager_namespace }}"
+    name: kube-prometheus-stack-alertmanager
+    definition:
+      spec:
+        template:
+          metadata:
+            annotations:
+              restartedAt: "{{ ansible_date_time.iso8601 }}"

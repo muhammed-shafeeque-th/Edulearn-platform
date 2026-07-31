@@ -1,0 +1,10 @@
+---
+- name: Deploy Grafana HTTPRoute
+  kubernetes.core.k8s:
+    state: present
+    template: httproute.yaml.j2
+
+- name: Deploy Grafana TargetGroupConfiguration
+  kubernetes.core.k8s:
+    state: present
+    template: targetgroupconfiguration.yaml.j2
