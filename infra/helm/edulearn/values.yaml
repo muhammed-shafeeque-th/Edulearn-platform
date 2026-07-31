@@ -16,7 +16,7 @@ api-gateway:
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/gateway
     pullPolicy: IfNotPresent
-    tag: "v1.1.6"
+    tag: "v1.1.10"
 
   service:
     type: ClusterIP
@@ -131,7 +131,7 @@ auth:
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/auth
     pullPolicy: IfNotPresent
-    tag: "v1.1.6"
+    tag: "v1.1.10"
 
   service:
     type: ClusterIP
@@ -255,7 +255,7 @@ user:
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/user
     pullPolicy: IfNotPresent
-    tag: "v1.1.7"
+    tag: "v1.1.10"
 
   service:
     type: ClusterIP
@@ -375,7 +375,7 @@ course:
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/course
     pullPolicy: IfNotPresent
-    tag: "v1.1.7"
+    tag: "v1.1.10"
 
   service:
     type: ClusterIP
@@ -515,7 +515,7 @@ payment:
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/payment
     pullPolicy: IfNotPresent
-    tag: "v1.1.7"
+    tag: "v1.1.10"
 
   service:
     type: ClusterIP
@@ -643,7 +643,7 @@ notification:
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/notification
     pullPolicy: IfNotPresent
-    tag: "v1.1.6"
+    tag: "v1.1.10"
 
   service:
     type: ClusterIP
@@ -773,7 +773,7 @@ order:
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/order
     pullPolicy: IfNotPresent
-    tag: "v1.1.6"
+    tag: "v1.1.10"
 
   service:
     type: ClusterIP
@@ -892,7 +892,7 @@ chat:
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/chat
     pullPolicy: IfNotPresent
-    tag: "v1.1.7"
+    tag: "v1.1.10"
 
   service:
     type: ClusterIP
@@ -1028,13 +1028,13 @@ configData:
   REDIS_MIN_CONNECTIONS: "10"
   REDIS_TTL: "3600"
 
-  AUTH_SERVICE_GRPC: edulearn-auth:50051
-  USER_SERVICE_GRPC: edulearn-user:50052
-  COURSE_SERVICE_GRPC: edulearn-course:50053
-  NOTIFICATION_SERVICE_GRPC: edulearn-notification:50056
-  PAYMENT_SERVICE_GRPC: edulearn-payment:50055
-  ORDER_SERVICE_GRPC: edulearn-order:50054
-  CHAT_SERVICE_GRPC: edulearn-chat:50059
+  AUTH_SERVICE_GRPC: edulearn-app-auth:50051
+  USER_SERVICE_GRPC: edulearn-app-user:50052
+  COURSE_SERVICE_GRPC: edulearn-app-course:50053
+  NOTIFICATION_SERVICE_GRPC: edulearn-app-notification:50056
+  PAYMENT_SERVICE_GRPC: edulearn-app-payment:50055
+  ORDER_SERVICE_GRPC: edulearn-app-order:50054
+  CHAT_SERVICE_GRPC: edulearn-app-chat:50059
 
   # CORS CONFIGURATION
   ALLOWED_ORIGINS: https://edulearn-client.vercel.app
