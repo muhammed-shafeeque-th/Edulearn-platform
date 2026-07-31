@@ -2,10 +2,14 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - extra-kube-manifests/http-route.yaml
-  - extra-kube-manifests/payment-http-route.yaml
-  - extra-kube-manifests/target-grp.yaml
+  - extra-kube-manifests/chat-route.yaml
+  - extra-kube-manifests/gateway-route.yaml
+  - extra-kube-manifests/notification-route.yaml
+  - extra-kube-manifests/payment-route.yaml
+  - extra-kube-manifests/chat-target-grp.yaml
   - extra-kube-manifests/payment-target-grp.yaml
+  - extra-kube-manifests/gateway-target-grp.yaml
+  - extra-kube-manifests/notification-target-grp.yaml
 
 helmCharts:
   - name: edulearn
