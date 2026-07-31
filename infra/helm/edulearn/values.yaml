@@ -107,14 +107,14 @@ auth:
   enabled: true
   fullnameOverride: edulearn-auth
 
-  replicaCount: 2 # auth is a critical path, needs HA
+  replicaCount: 1 # auth is a critical path, needs HA
 
   # ADDED: pod disruption budget — with replicaCount 2, a node drain could
   # previously take both replicas down at once; this guarantees at least 1
   # stays up during voluntary disruptions.
-  podDisruptionBudget:
-    enabled: true
-    minAvailable: 1
+  # podDisruptionBudget:
+  #   enabled: true
+  #   minAvailable: 1
 
   # ADDED: spread the two replicas across nodes so they don't co-locate and
   # defeat the point of running 2 for HA.
@@ -493,13 +493,13 @@ payment:
   enabled: true
   fullnameOverride: edulearn-payment
 
-  replicaCount: 2 # payment is the other critical path, needs HA
+  replicaCount: 1 # payment is the other critical path, needs HA
 
   # ADDED: same reasoning as auth — 2 replicas need a PDB or a single node
   # drain can take the whole service down.
-  podDisruptionBudget:
-    enabled: true
-    minAvailable: 1
+  # podDisruptionBudget:
+  #   enabled: true
+  #   minAvailable: 1
 
   # ADDED: spread replicas across nodes.
   affinity:
