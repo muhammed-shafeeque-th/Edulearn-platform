@@ -5,7 +5,7 @@ metadata:
   namespace: edulearn-app
 spec:
   hostnames:
-    - "app.muhammedshafeeque.online"
+    - "api.muhammedshafeeque.online"
   parentRefs:
   - group: gateway.networking.k8s.io
     namespace: default
@@ -19,5 +19,5 @@ spec:
     sectionName: https
   rules:
   - backendRefs:
-    - name: edulearn-app-gateway
+    - name: edulearn-api-gateway
       port: 4000

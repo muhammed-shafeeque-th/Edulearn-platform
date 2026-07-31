@@ -5,6 +5,6 @@ metadata:
   namespace: edulearn-app
 spec:
   targetReference:
-    name: edulearn-app-gateway
+    name: edulearn-api-gateway
   defaultConfiguration:
     targetType: ip

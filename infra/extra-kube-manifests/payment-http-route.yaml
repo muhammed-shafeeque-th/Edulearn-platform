@@ -5,7 +5,7 @@ metadata:
   namespace: edulearn-app
 spec:
   hostnames:
-    - app.muhammedshafeeque.online
+    - api.muhammedshafeeque.online
 
   parentRefs:
     - name: app-alb-gateway
@@ -23,5 +23,5 @@ spec:
             value: /api/webhooks
 
       backendRefs:
-        - name: edulearn-app-payment
+        - name: edulearn-payment
           port: 3000
