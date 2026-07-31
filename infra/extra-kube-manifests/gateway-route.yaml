@@ -18,6 +18,10 @@ spec:
     name: app-alb-gateway
     sectionName: https
   rules:
-  - backendRefs:
-    - name: edulearn-api-gateway
-      port: 4000
+  - matches:
+      - path:
+          type: PathPrefix
+          value: /api
+    backendRefs:
+      - name: edulearn-api-gateway
+        port: 4000

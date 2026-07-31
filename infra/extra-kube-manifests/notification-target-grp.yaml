@@ -1,0 +1,10 @@
+apiVersion: gateway.k8s.aws/v1beta1
+kind: TargetGroupConfiguration
+metadata:
+  name: notification-tg-config
+  namespace: edulearn-app
+spec:
+  targetReference:
+    name: edulearn-notification
+  defaultConfiguration:
+    targetType: ip
