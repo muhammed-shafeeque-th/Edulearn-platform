@@ -10,7 +10,6 @@ fullnameOverride: edulearn
 api-gateway:
   enabled: true
   fullnameOverride: edulearn-api-gateway
-  
 
   replicaCount: 2
 
@@ -19,7 +18,6 @@ api-gateway:
     name: api-gateway-sa
     automount: true
     annotations: {}
-
 
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/gateway
@@ -43,12 +41,12 @@ api-gateway:
     port: http
 
   resources:
-    limits:
-      cpu: 500m
-      memory: 512Mi
     requests:
-      cpu: 250m
-      memory: 256Mi
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 400m
+      memory: 512Mi
 
   autoscaling:
     enabled: false
@@ -158,12 +156,12 @@ auth:
     port: http
 
   resources:
-    limits:
-      cpu: 500m
-      memory: 512Mi
     requests:
-      cpu: 250m
-      memory: 256Mi
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 400m
+      memory: 512Mi
 
   autoscaling:
     enabled: false
@@ -282,12 +280,12 @@ user:
     port: http
 
   resources:
-    limits:
-      cpu: 500m
-      memory: 512Mi
     requests:
-      cpu: 250m
-      memory: 256Mi
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 400m
+      memory: 512Mi
 
   autoscaling:
     enabled: false
@@ -402,12 +400,12 @@ course:
     port: http
 
   resources:
-    limits:
-      cpu: 500m
-      memory: 512Mi
     requests:
-      cpu: 250m
-      memory: 256Mi
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 400m
+      memory: 512Mi
 
   autoscaling:
     enabled: false
@@ -548,12 +546,12 @@ payment:
     port: http
 
   resources:
-    limits:
-      cpu: 500m
-      memory: 512Mi
     requests:
-      cpu: 250m
-      memory: 256Mi
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 400m
+      memory: 512Mi
 
   autoscaling:
     enabled: false
@@ -673,12 +671,12 @@ notification:
     port: http
 
   resources:
-    limits:
-      cpu: 500m
-      memory: 512Mi
     requests:
-      cpu: 250m
-      memory: 256Mi
+      cpu: 75m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 384Mi
 
   autoscaling:
     enabled: false
@@ -800,12 +798,12 @@ order:
     port: http
 
   resources:
-    limits:
-      cpu: 500m
-      memory: 512Mi
     requests:
-      cpu: 250m
-      memory: 256Mi
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 400m
+      memory: 512Mi
 
   autoscaling:
     enabled: false
@@ -919,12 +917,12 @@ chat:
     port: http
 
   resources:
-    limits:
-      cpu: 500m
-      memory: 512Mi
     requests:
-      cpu: 250m
-      memory: 256Mi
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 400m
+      memory: 512Mi
 
   autoscaling:
     enabled: false
@@ -1090,6 +1088,13 @@ redis:
         enabled: true
         storageClass: gp3
         size: 2Gi
+      resources:
+        requests:
+          cpu: 50m
+          memory: 96Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
 
     replica:
       replicaCount: 0
@@ -1140,6 +1145,13 @@ postgres:
       persistence:
         enabled: true
         size: 2Gi
+      resources:
+        requests:
+          cpu: 200m
+          memory: 384Mi
+        limits:
+          cpu: 600m
+          memory: 1Gi
 
     readReplicas:
       enabled: false
@@ -1147,14 +1159,6 @@ postgres:
     service:
       type: ClusterIP
       port: 5432
-
-    resources:
-      requests:
-        cpu: 500m
-        memory: 1Gi
-      limits:
-        cpu: 1000m
-        memory: 2Gi
 
   externalSecret:
     enabled: true
@@ -1212,6 +1216,14 @@ kafka:
     controller:
       replicaCount: 1
 
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 400m
+          memory: 512Mi
+
       persistence:
         enabled: true
         storageClass: gp3
@@ -1224,6 +1236,14 @@ kafka:
         enabled: true
         storageClass: gp3
         size: 2Gi
+
+      resources:
+        requests:
+          cpu: 150m
+          memory: 384Mi
+        limits:
+          cpu: 600m
+          memory: 768Mi
 
     listeners:
       client:
