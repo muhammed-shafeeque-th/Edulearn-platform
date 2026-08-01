@@ -14,6 +14,13 @@ api-gateway:
 
   replicaCount: 2
 
+  serviceAccount:
+    create: true
+    name: api-gateway-sa
+    automount: true
+    annotations: {}
+
+
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/gateway
     pullPolicy: IfNotPresent
@@ -107,13 +114,13 @@ auth:
   enabled: true
   fullnameOverride: edulearn-auth
 
-  replicaCount: 1 # auth is a critical path, needs HA
+  replicaCount: 2 # auth is a critical path, needs HA
 
   # ADDED: pod disruption budget — with replicaCount 2, a node drain could
   # previously take both replicas down at once; this guarantees at least 1
   # stays up during voluntary disruptions.
   podDisruptionBudget:
-    enabled: false
+    enabled: true
     minAvailable: 1
 
   # ADDED: spread the two replicas across nodes so they don't co-locate and
@@ -493,12 +500,12 @@ payment:
   enabled: true
   fullnameOverride: edulearn-payment
 
-  replicaCount: 1 # payment is the other critical path, needs HA
+  replicaCount: 2 # payment is the other critical path, needs HA
 
   # ADDED: same reasoning as auth — 2 replicas need a PDB or a single node
   # drain can take the whole service down.
   podDisruptionBudget:
-    enabled: false
+    enabled: true
     minAvailable: 1
 
   # ADDED: spread replicas across nodes.

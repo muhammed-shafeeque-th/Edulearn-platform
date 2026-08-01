@@ -79,6 +79,17 @@ module "loki_pod_identity" {
   policy_name     = "AllowLokiS3Access"
   policy_document = file("${path.module}/policies/loki-policy.json")
 }
+module "api_gateway_pod_identity" {
+
+  source          = "../../modules/pod-identity"
+  cluster_name    = module.eks.cluster_name
+  namespace       = "observability"
+  service_account = "api-gateway-sa"
+  role_name       = "api-gateway-pod-identity-role"
+  create_policy   = true
+  policy_name     = "AllowApiGatewayS3Access"
+  policy_document = file("${path.module}/policies/api-gateway-policy.json")
+}
 module "tempo_pod_identity" {
 
   source          = "../../modules/pod-identity"
