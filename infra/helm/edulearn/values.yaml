@@ -163,11 +163,44 @@ auth:
       cpu: 400m
       memory: 512Mi
 
+
   autoscaling:
     enabled: false
-    minReplicas: 1
+
+    # Minimum number of pods to always run
+    minReplicas: 2
+
+    # Maximum number of pods allowed during peak load
     maxReplicas: 10
-    targetCPUUtilizationPercentage: 80
+
+    # CPU target utilization (good default for most stateless APIs)
+    targetCPUUtilizationPercentage: 70
+
+    # Memory target (enable only if your workload is memory-sensitive)
+    targetMemoryUtilizationPercentage: 75
+
+    behavior:
+      scaleUp:
+        # React quickly to traffic spikes
+        stabilizationWindowSeconds: 0
+        selectPolicy: Max
+        policies:
+          - type: Percent
+            value: 100
+            periodSeconds: 15
+          - type: Pods
+            value: 2
+            periodSeconds: 15
+
+      scaleDown:
+        # Prevent flapping during traffic drops
+        stabilizationWindowSeconds: 300
+        selectPolicy: Min
+        policies:
+          - type: Percent
+            value: 50
+            periodSeconds: 60
+
 
   livenessProbe:
     httpGet:
@@ -210,7 +243,7 @@ auth:
           key: edulearn/prod/auth
 
   configData:
-    POSTGRES_HOST: postgres
+    POSTGRES_HOST: edulearn-app-postgresql
     POSTGRES_PORT: "5432"
     POSTGRES_DB: auth_service
     POSTGRES_USER: postgres
@@ -602,7 +635,7 @@ payment:
           key: edulearn/prod/payment
 
   configData:
-    POSTGRES_HOST: postgres
+    POSTGRES_HOST: edulearn-app-postgresql
     POSTGRES_PORT: "5432"
     POSTGRES_DB: payment_service
     POSTGRES_SSL_MODE: disable
@@ -726,7 +759,7 @@ notification:
           key: edulearn/prod/notification
 
   configData:
-    POSTGRES_HOST: postgres
+    POSTGRES_HOST: edulearn-app-postgresql
     POSTGRES_PORT: "5432"
     POSTGRES_DB: notification_service
     POSTGRES_USER: postgres
@@ -859,7 +892,7 @@ order:
           key: edulearn/prod/order
 
   configData:
-    POSTGRES_HOST: postgres
+    POSTGRES_HOST: edulearn-app-postgresql
     POSTGRES_PORT: "5432"
     POSTGRES_DB: order_service
     POSTGRES_SSL_MODE: disable
