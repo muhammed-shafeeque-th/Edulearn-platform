@@ -1226,6 +1226,44 @@ postgres:
       type: ClusterIP
       port: 5432
 
+  externalSecret:
+    enabled: true
+    targetSecretName: postgres
+    refreshInterval: 1h
+
+    secretStoreRef:
+      name: aws-secrets-manager
+      kind: ClusterSecretStore
+
+    data:
+      - secretKey: postgres-password
+        remoteKey: edulearn/prod/postgres
+        property: postgres-password
+
+      - secretKey: password
+        remoteKey: edulearn/prod/postgres
+        property: password
+
+      - secretKey: username
+        remoteKey: edulearn/prod/postgres
+        property: username
+
+      - secretKey: database
+        remoteKey: edulearn/prod/postgres
+        property: database
+
+    metrics:
+      enabled: true
+
+      serviceMonitor:
+        enabled: true
+        namespace: monitoring
+
+        labels:
+          release: kube-prometheus-stack
+
+        interval: 30s
+
 kafka:
   enabled: true
 
