@@ -121,6 +121,12 @@ auth:
     enabled: true
     minAvailable: 1
 
+  # This causes replicas to be spread across zones. with replicaCount: 3  auth-1 → 1a, auth-2 → 1b, auth-3 → 1c. instead of all landing in 1a.
+  topologySpreadConstraints:
+    enabled: true
+    maxSkew: 1
+    whenUnsatisfiable: ScheduleAnyway
+
   # ADDED: spread the two replicas across nodes so they don't co-locate and
   # defeat the point of running 2 for HA.
   affinity:
@@ -163,7 +169,6 @@ auth:
       cpu: 400m
       memory: 512Mi
 
-
   autoscaling:
     enabled: false
 
@@ -200,7 +205,6 @@ auth:
           - type: Percent
             value: 50
             periodSeconds: 60
-
 
   livenessProbe:
     httpGet:
@@ -770,6 +774,7 @@ notification:
     DB_CONN_MAX_IDLE_TIME: 5m
 
     TEMPLATE_BASE_PATH: pkg/templates
+    OTLP_ENDPOINT: otel-collector.observability.svc.cluster.local:4317
 
     KAFKA_CONSUMER_GROUP: notification-service-group
     KAFKA_WORKERS: "6"
@@ -1129,6 +1134,10 @@ redis:
           cpu: 200m
           memory: 256Mi
 
+      pdb:
+        create: true
+        minAvailable: 1
+
     replica:
       replicaCount: 0
 
@@ -1157,6 +1166,7 @@ redis:
 
 postgres:
   enabled: true
+
   postgres:
     auth:
       existingSecret: postgres-secret
@@ -1166,9 +1176,9 @@ postgres:
         userPasswordKey: password
 
       username: postgres
-      database: edulearn
+      database: postgres # use default postgres DB for bootstrap
 
-    architecture: standalone # Change to replication for HA in prod
+    architecture: standalone
 
     image:
       repository: bitnami/postgresql
@@ -1178,6 +1188,11 @@ postgres:
       persistence:
         enabled: true
         size: 2Gi
+
+      pdb:
+        create: true
+        minAvailable: 1
+
       resources:
         requests:
           cpu: 200m
@@ -1186,50 +1201,30 @@ postgres:
           cpu: 600m
           memory: 1Gi
 
+      initdb:
+        scripts:
+          01-create-edulearn-databases.sql: |
+            SELECT 'CREATE DATABASE auth_service'
+            WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'auth_service')\gexec
+
+            SELECT 'CREATE DATABASE user_service'
+            WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'user_service')\gexec
+
+            SELECT 'CREATE DATABASE course_service'
+            WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'course_service')\gexec
+
+            SELECT 'CREATE DATABASE notification_service'
+            WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'notification_service')\gexec
+
+            SELECT 'CREATE DATABASE order_service'
+            WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'order_service')\gexec
+
     readReplicas:
       enabled: false
 
     service:
       type: ClusterIP
       port: 5432
-
-  externalSecret:
-    enabled: true
-    targetSecretName: postgres
-    refreshInterval: 1h
-
-    secretStoreRef:
-      name: aws-secrets-manager
-      kind: ClusterSecretStore
-
-    data:
-      - secretKey: postgres-password
-        remoteKey: edulearn/prod/postgres
-        property: postgres-password
-
-      - secretKey: password
-        remoteKey: edulearn/prod/postgres
-        property: password
-
-      - secretKey: username
-        remoteKey: edulearn/prod/postgres
-        property: username
-
-      - secretKey: database
-        remoteKey: edulearn/prod/postgres
-        property: database
-
-    metrics:
-      enabled: true
-
-      serviceMonitor:
-        enabled: true
-        namespace: monitoring
-
-        labels:
-          release: kube-prometheus-stack
-
-        interval: 30s
 
 kafka:
   enabled: true
@@ -1262,6 +1257,10 @@ kafka:
         storageClass: gp3
         size: 2Gi
 
+      pdb:
+        create: true
+        minAvailable: 1
+
     broker:
       replicaCount: 1
 
@@ -1269,6 +1268,10 @@ kafka:
         enabled: true
         storageClass: gp3
         size: 2Gi
+
+      pdb:
+        create: true
+        minAvailable: 1
 
       resources:
         requests:
