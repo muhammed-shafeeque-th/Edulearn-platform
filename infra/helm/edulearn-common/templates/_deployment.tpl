@@ -30,6 +30,17 @@ spec:
       automountServiceAccountToken: {{ .Values.serviceAccount.automount | default false }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        
+      # This causes replicas to be spread across zones.
+      {{- if .Values.topologySpreadConstraints.enabled }}
+      topologySpreadConstraints:
+        - maxSkew: {{ .Values.topologySpreadConstraints.maxSkew | default 1 }}
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: {{ .Values.topologySpreadConstraints.whenUnsatisfiable | default "ScheduleAnyway" }}
+          labelSelector:
+            matchLabels:
+              {{- include "edulearn-common.selectorLabels" . | nindent 14 }}
+      {{- end }} 
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -103,7 +114,7 @@ spec:
       {{- end }}
       {{- with .Values.affinity }}
       affinity:
-        {{- toYaml . | nindent 8 }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:
