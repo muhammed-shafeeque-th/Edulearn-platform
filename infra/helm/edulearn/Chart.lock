@@ -1,31 +1,31 @@
 dependencies:
 - name: edulearn-common
   repository: file://../edulearn-common
-  version: 1.1.0
+  version: 1.1.1
 - name: api-gateway
   repository: file://../charts/api-gateway
-  version: 1.0.4
+  version: 1.0.5
 - name: auth
   repository: file://../charts/auth
-  version: 1.0.4
+  version: 1.0.5
 - name: user
   repository: file://../charts/user
-  version: 1.0.4
+  version: 1.0.5
 - name: course
   repository: file://../charts/course
-  version: 1.0.4
+  version: 1.0.5
 - name: payment
   repository: file://../charts/payment
-  version: 1.0.4
+  version: 1.0.5
 - name: order
   repository: file://../charts/order
-  version: 1.0.4
+  version: 1.0.5
 - name: notification
   repository: file://../charts/notification
-  version: 1.0.4
+  version: 1.0.5
 - name: chat
   repository: file://../charts/chat
-  version: 1.0.4
+  version: 1.0.5
 - name: redis
   repository: file://../charts/redis
   version: 1.0.1
@@ -35,5 +35,5 @@ dependencies:
 - name: postgres
   repository: file://../charts/postgres
   version: 1.0.1
-digest: sha256:c8dbda9b8f496535a7be00b8f3407b598c7d5e10064c4509ef64441b84d03949
-generated: "2026-07-27T20:30:34.9759068+05:30"
+digest: sha256:58a4c637b3faff009016958c87c7daa1543005b5e97149973282dcaacbf01b41
+generated: "2026-08-03T17:31:48.0630176+05:30"
