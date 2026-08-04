@@ -54,6 +54,12 @@ api-gateway:
     maxReplicas: 10
     targetCPUUtilizationPercentage: 80
 
+
+  topologySpreadConstraints:
+    enabled: true
+    maxSkew: 1
+    whenUnsatisfiable: ScheduleAnyway
+
   livenessProbe:
     httpGet:
       path: /healthz
@@ -774,7 +780,7 @@ notification:
     DB_CONN_MAX_IDLE_TIME: 5m
 
     TEMPLATE_BASE_PATH: pkg/templates
-    OTLP_ENDPOINT: otel-collector.observability.svc.cluster.local:4317
+    OTLP_ENDPOINT: otel-collector-opentelemetry-collector.observability.svc.cluster.local:4317
 
     KAFKA_CONSUMER_GROUP: notification-service-group
     KAFKA_WORKERS: "6"
@@ -1134,6 +1140,15 @@ redis:
           cpu: 200m
           memory: 256Mi
 
+      nodeSelector:
+        workload: stateful
+
+      tolerations:
+        - key: workload
+          operator: Equal
+          value: stateful
+          effect: NoSchedule
+
       pdb:
         create: true
         minAvailable: 1
@@ -1200,6 +1215,14 @@ postgres:
         limits:
           cpu: 600m
           memory: 1Gi
+      nodeSelector:
+        workload: stateful
+
+      tolerations:
+        - key: workload
+          operator: Equal
+          value: stateful
+          effect: NoSchedule
 
       initdb:
         scripts:
@@ -1263,7 +1286,6 @@ postgres:
           release: kube-prometheus-stack
 
         interval: 30s
-
 kafka:
   enabled: true
 
@@ -1281,14 +1303,17 @@ kafka:
 
     controller:
       replicaCount: 1
+      controllerOnly: true
 
-      resources:
-        requests:
-          cpu: 100m
-          memory: 256Mi
-        limits:
-          cpu: 400m
-          memory: 512Mi
+      nodeSelector:
+        workload: stateful
+        topology: ap-south-1a
+
+      tolerations:
+        - key: workload
+          operator: Equal
+          value: stateful
+          effect: NoSchedule
 
       persistence:
         enabled: true
@@ -1299,6 +1324,15 @@ kafka:
         create: true
         minAvailable: 1
 
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 400m
+          memory: 512Mi
+
+
     broker:
       replicaCount: 1
 
@@ -1306,6 +1340,16 @@ kafka:
         enabled: true
         storageClass: gp3
         size: 2Gi
+
+      nodeSelector:
+        workload: stateful
+
+      tolerations:
+        - key: workload
+          operator: Equal
+          value: stateful
+          effect: NoSchedule
+
 
       pdb:
         create: true
