@@ -78,66 +78,90 @@ module "eks" {
   }
 
   eks_managed_node_groups = {
-  workers_1a = {
-    subnet_ids                 = [var.private_subnet_ids[0]]
-    min_size                   = 1
-    desired_size               = 2
-    max_size                   = 4
-    instance_types             = ["c7i-flex.large"]
-    capacity_type              = "ON_DEMAND"
-    disk_size                  = 35
-    use_custom_launch_template = false
 
-    remote_access = {
-      ec2_ssh_key               = var.key_name
-      source_security_group_ids = [var.bastion_sg_id]
+    stateful_1a = {
+      subnet_ids   = [var.private_subnet_ids[0]] # ap-south-1a
+      min_size     = 1
+      desired_size = 2
+      max_size     = 3
+
+      capacity_type  = "ON_DEMAND"
+      instance_types = ["c7i-flex.large"]
+      disk_size      = 50
+
+      labels = {
+        workload = "stateful"
+        topology = "ap-south-1a"
+      }
+
+      taints = {
+        stateful = {
+          key    = "workload"
+          value  = "stateful"
+          effect = "NO_SCHEDULE"
+        }
+      }
+    }
+    # workers_1a = {
+    #   subnet_ids                 = [var.private_subnet_ids[0]]
+    #   min_size                   = 1
+    #   desired_size               = 1
+    #   max_size                   = 4
+    #   instance_types             = ["c7i-flex.large"]
+    #   capacity_type              = "ON_DEMAND"
+    #   disk_size                  = 35
+    #   use_custom_launch_template = false
+
+    #   remote_access = {
+    #     ec2_ssh_key               = var.key_name
+    #     source_security_group_ids = [var.bastion_sg_id]
+    #   }
+
+    #   labels = {
+    #     topology = "ap-south-1a"
+    #   }
+    # }
+
+    workers_1b = {
+      subnet_ids                 = [var.private_subnet_ids[1]]
+      min_size                   = 1
+      desired_size               = 1
+      max_size                   = 4
+      instance_types             = ["c7i-flex.large"]
+      capacity_type              = "SPOT"
+      disk_size                  = 35
+      use_custom_launch_template = false
+
+      remote_access = {
+        ec2_ssh_key               = var.key_name
+        source_security_group_ids = [var.bastion_sg_id]
+      }
+
+      labels = {
+        topology = "ap-south-1b"
+      }
     }
 
-    labels = {
-      topology = "ap-south-1a"
+    workers_1c = {
+      subnet_ids                 = [var.private_subnet_ids[2]]
+      min_size                   = 1
+      desired_size               = 1
+      max_size                   = 4
+      instance_types             = ["c7i-flex.large"]
+      capacity_type              = "SPOT"
+      disk_size                  = 35
+      use_custom_launch_template = false
+
+      remote_access = {
+        ec2_ssh_key               = var.key_name
+        source_security_group_ids = [var.bastion_sg_id]
+      }
+
+      labels = {
+        topology = "ap-south-1c"
+      }
     }
   }
-
-  workers_1b = {
-    subnet_ids                 = [var.private_subnet_ids[1]]
-    min_size                   = 1
-    desired_size               = 1
-    max_size                   = 4
-    instance_types             = ["c7i-flex.large"]
-    capacity_type              = "SPOT"
-    disk_size                  = 35
-    use_custom_launch_template = false
-
-    remote_access = {
-      ec2_ssh_key               = var.key_name
-      source_security_group_ids = [var.bastion_sg_id]
-    }
-
-    labels = {
-      topology = "ap-south-1b"
-    }
-  }
-
-  workers_1c = {
-    subnet_ids                 = [var.private_subnet_ids[2]]
-    min_size                   = 1
-    desired_size               = 1
-    max_size                   = 4
-    instance_types             = ["c7i-flex.large"]
-    capacity_type              = "SPOT"
-    disk_size                  = 35
-    use_custom_launch_template = false
-
-    remote_access = {
-      ec2_ssh_key               = var.key_name
-      source_security_group_ids = [var.bastion_sg_id]
-    }
-
-    labels = {
-      topology = "ap-south-1c"
-    }
-  }
-}
 
   tags = var.tags
 }
