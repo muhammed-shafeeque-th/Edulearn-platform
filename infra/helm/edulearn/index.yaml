@@ -3,7 +3,7 @@ entries:
   api-gateway:
   - apiVersion: v2
     appVersion: 1.0.5
-    created: "2026-08-04T22:41:25.410659+05:30"
+    created: "2026-08-05T10:20:14.5301434+05:30"
     dependencies:
     - name: edulearn-common
       repository: file://../../edulearn-common
@@ -18,7 +18,7 @@ entries:
   auth:
   - apiVersion: v2
     appVersion: 1.0.5
-    created: "2026-08-04T22:41:25.42555+05:30"
+    created: "2026-08-05T10:20:14.5301434+05:30"
     dependencies:
     - name: edulearn-common
       repository: file://../../../edulearn-common
@@ -33,7 +33,7 @@ entries:
   chat:
   - apiVersion: v2
     appVersion: 1.0.5
-    created: "2026-08-04T22:41:25.4373939+05:30"
+    created: "2026-08-05T10:20:14.5311836+05:30"
     dependencies:
     - name: edulearn-common
       repository: file://../../../edulearn-common
@@ -48,7 +48,7 @@ entries:
   course:
   - apiVersion: v2
     appVersion: 1.0.5
-    created: "2026-08-04T22:41:25.450717+05:30"
+    created: "2026-08-05T10:20:14.5311836+05:30"
     dependencies:
     - name: edulearn-common
       repository: file://../../../edulearn-common
@@ -63,7 +63,7 @@ entries:
   edulearn:
   - apiVersion: v2
     appVersion: 1.0.11
-    created: "2026-08-04T22:41:25.4031081+05:30"
+    created: "2026-08-05T10:20:14.5289412+05:30"
     dependencies:
     - name: edulearn-common
       repository: file://../edulearn-common
@@ -113,7 +113,7 @@ entries:
       repository: file://../charts/postgres
       version: 1.0.1
     description: EduLearn Platform Umbrella chart for EduLearn platform
-    digest: 422d55a4fbedca756e0a6ab4faca91572d1c3672e06aff130501044c4060648b
+    digest: 1a5ce7347e525c4e649f23ac76008bf3738c9f6002dbd724b41bcee0dd7ff990
     name: edulearn
     type: application
     urls:
@@ -122,7 +122,7 @@ entries:
   edulearn-common:
   - apiVersion: v2
     appVersion: 1.1.1
-    created: "2026-08-04T22:41:25.4621654+05:30"
+    created: "2026-08-05T10:20:14.5328658+05:30"
     description: A library chart with common templates for EduLearn microservices
     digest: 75f07bae855e36b0ab5b6c4d953944f2b17ebb3e616293d9a08eeefcce41123c
     name: edulearn-common
@@ -133,7 +133,7 @@ entries:
   kafka:
   - apiVersion: v2
     appVersion: 1.0.1
-    created: "2026-08-04T22:41:25.478545+05:30"
+    created: "2026-08-05T10:20:14.5404864+05:30"
     dependencies:
     - alias: kafka
       name: kafka
@@ -149,7 +149,7 @@ entries:
   notification:
   - apiVersion: v2
     appVersion: 1.0.5
-    created: "2026-08-04T22:41:25.489486+05:30"
+    created: "2026-08-05T10:20:14.5415079+05:30"
     dependencies:
     - name: edulearn-common
       repository: file://../../../edulearn-common
@@ -164,7 +164,7 @@ entries:
   order:
   - apiVersion: v2
     appVersion: 1.0.5
-    created: "2026-08-04T22:41:25.4982517+05:30"
+    created: "2026-08-05T10:20:14.5420495+05:30"
     dependencies:
     - name: edulearn-common
       repository: file://../../../edulearn-common
@@ -179,7 +179,7 @@ entries:
   payment:
   - apiVersion: v2
     appVersion: 1.0.5
-    created: "2026-08-04T22:41:25.5078731+05:30"
+    created: "2026-08-05T10:20:14.5420495+05:30"
     dependencies:
     - name: edulearn-common
       repository: file://../../../edulearn-common
@@ -194,7 +194,7 @@ entries:
   postgres:
   - apiVersion: v2
     appVersion: 1.0.1
-    created: "2026-08-04T22:41:25.5242675+05:30"
+    created: "2026-08-05T10:20:14.5490855+05:30"
     dependencies:
     - name: edulearn-common
       repository: file://../../edulearn-common
@@ -213,7 +213,7 @@ entries:
   redis:
   - apiVersion: v2
     appVersion: 1.0.1
-    created: "2026-08-04T22:41:25.536465+05:30"
+    created: "2026-08-05T10:20:14.5566327+05:30"
     dependencies:
     - alias: redis
       name: redis
@@ -229,7 +229,7 @@ entries:
   user:
   - apiVersion: v2
     appVersion: 1.0.5
-    created: "2026-08-04T22:41:25.5501104+05:30"
+    created: "2026-08-05T10:20:14.5566327+05:30"
     dependencies:
     - name: edulearn-common
       repository: file://../../../edulearn-common
@@ -241,4 +241,4 @@ entries:
     urls:
     - https://muhammed-shafeeque-th.github.io/Edulearn-platform/charts/user-1.0.5.tgz
     version: 1.0.5
-generated: "2026-08-04T22:41:25.354986+05:30"
+generated: "2026-08-05T10:20:14.497491+05:30"
