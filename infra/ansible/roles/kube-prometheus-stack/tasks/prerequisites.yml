@@ -21,7 +21,7 @@
 - name: Update Helm repositories
   ansible.builtin.command:
 
-    cmd: helm repo update
+    cmd: helm repo update prometheus-community
 
   changed_when: false
 
