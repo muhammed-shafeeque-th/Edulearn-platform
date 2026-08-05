@@ -1,0 +1,244 @@
+apiVersion: v1
+entries:
+  api-gateway:
+  - apiVersion: v2
+    appVersion: 1.0.5
+    created: "2026-08-05T10:20:14.5301434+05:30"
+    dependencies:
+    - name: edulearn-common
+      repository: file://../../edulearn-common
+      version: 1.1.1
+    description: API Gateway for EduLearn
+    digest: 1e8cbd3dbb4c4e5aab6db6a58f264722eb880db022acdb69829074eb81abb56b
+    name: api-gateway
+    type: application
+    urls:
+    - https://muhammed-shafeeque-th.github.io/Edulearn-platform/charts/api-gateway-1.0.5.tgz
+    version: 1.0.5
+  auth:
+  - apiVersion: v2
+    appVersion: 1.0.5
+    created: "2026-08-05T10:20:14.5301434+05:30"
+    dependencies:
+    - name: edulearn-common
+      repository: file://../../../edulearn-common
+      version: 1.1.1
+    description: Authentication service for EduLearn
+    digest: 73fb52a333f99c86764d545f8f5d3e2f762bc885daf545bf10404d600cb0021a
+    name: auth
+    type: application
+    urls:
+    - https://muhammed-shafeeque-th.github.io/Edulearn-platform/charts/auth-1.0.5.tgz
+    version: 1.0.5
+  chat:
+  - apiVersion: v2
+    appVersion: 1.0.5
+    created: "2026-08-05T10:20:14.5311836+05:30"
+    dependencies:
+    - name: edulearn-common
+      repository: file://../../../edulearn-common
+      version: 1.1.1
+    description: Chat service of EduLearn
+    digest: 51810a206193f68dde7b5974eda4cb0c919eda21e332b87f73bdffa33c303fcd
+    name: chat
+    type: application
+    urls:
+    - https://muhammed-shafeeque-th.github.io/Edulearn-platform/charts/chat-1.0.5.tgz
+    version: 1.0.5
+  course:
+  - apiVersion: v2
+    appVersion: 1.0.5
+    created: "2026-08-05T10:20:14.5311836+05:30"
+    dependencies:
+    - name: edulearn-common
+      repository: file://../../../edulearn-common
+      version: 1.1.1
+    description: Course service of EduLearn
+    digest: 5d1716223a54a8b04bae601c08d5882e4d7232c18de4b5babd6ebe5037e2d55c
+    name: course
+    type: application
+    urls:
+    - https://muhammed-shafeeque-th.github.io/Edulearn-platform/charts/course-1.0.5.tgz
+    version: 1.0.5
+  edulearn:
+  - apiVersion: v2
+    appVersion: 1.0.11
+    created: "2026-08-05T10:20:14.5289412+05:30"
+    dependencies:
+    - name: edulearn-common
+      repository: file://../edulearn-common
+      version: 1.1.1
+    - condition: api-gateway.enabled
+      name: api-gateway
+      repository: file://../charts/api-gateway
+      version: 1.0.5
+    - condition: auth.enabled
+      name: auth
+      repository: file://../charts/auth
+      version: 1.0.5
+    - condition: user.enabled
+      name: user
+      repository: file://../charts/user
+      version: 1.0.5
+    - condition: course.enabled
+      name: course
+      repository: file://../charts/course
+      version: 1.0.5
+    - condition: payment.enabled
+      name: payment
+      repository: file://../charts/payment
+      version: 1.0.5
+    - condition: order.enabled
+      name: order
+      repository: file://../charts/order
+      version: 1.0.5
+    - condition: notification.enabled
+      name: notification
+      repository: file://../charts/notification
+      version: 1.0.5
+    - condition: chat.enabled
+      name: chat
+      repository: file://../charts/chat
+      version: 1.0.5
+    - condition: redis.enabled
+      name: redis
+      repository: file://../charts/redis
+      version: 1.0.1
+    - condition: kafka.enabled
+      name: kafka
+      repository: file://../charts/kafka
+      version: 1.0.1
+    - condition: postgres.enabled
+      name: postgres
+      repository: file://../charts/postgres
+      version: 1.0.1
+    description: EduLearn Platform Umbrella chart for EduLearn platform
+    digest: 1a5ce7347e525c4e649f23ac76008bf3738c9f6002dbd724b41bcee0dd7ff990
+    name: edulearn
+    type: application
+    urls:
+    - https://muhammed-shafeeque-th.github.io/Edulearn-platform/edulearn-1.0.11.tgz
+    version: 1.0.11
+  edulearn-common:
+  - apiVersion: v2
+    appVersion: 1.1.1
+    created: "2026-08-05T10:20:14.5328658+05:30"
+    description: A library chart with common templates for EduLearn microservices
+    digest: 75f07bae855e36b0ab5b6c4d953944f2b17ebb3e616293d9a08eeefcce41123c
+    name: edulearn-common
+    type: library
+    urls:
+    - https://muhammed-shafeeque-th.github.io/Edulearn-platform/charts/edulearn-common-1.1.1.tgz
+    version: 1.1.1
+  kafka:
+  - apiVersion: v2
+    appVersion: 1.0.1
+    created: "2026-08-05T10:20:14.5404864+05:30"
+    dependencies:
+    - alias: kafka
+      name: kafka
+      repository: https://charts.bitnami.com/bitnami
+      version: 32.4.3
+    description: Kafka wrapper using Bitnami chart
+    digest: b65fac904ba20a4ef2ab8bbae3c44ebcfd81788c36db544aa1b4669ca0055738
+    name: kafka
+    type: application
+    urls:
+    - https://muhammed-shafeeque-th.github.io/Edulearn-platform/charts/kafka-1.0.1.tgz
+    version: 1.0.1
+  notification:
+  - apiVersion: v2
+    appVersion: 1.0.5
+    created: "2026-08-05T10:20:14.5415079+05:30"
+    dependencies:
+    - name: edulearn-common
+      repository: file://../../../edulearn-common
+      version: 1.1.1
+    description: notification for EduLearn
+    digest: 2846241d3bccb1ebab8cd5f589eba9517404c97d7d9134bdc3dd33c224049819
+    name: notification
+    type: application
+    urls:
+    - https://muhammed-shafeeque-th.github.io/Edulearn-platform/charts/notification-1.0.5.tgz
+    version: 1.0.5
+  order:
+  - apiVersion: v2
+    appVersion: 1.0.5
+    created: "2026-08-05T10:20:14.5420495+05:30"
+    dependencies:
+    - name: edulearn-common
+      repository: file://../../../edulearn-common
+      version: 1.1.1
+    description: Order service of EduLearn
+    digest: faed6ce50f1dad1b02a5b7093a1c9c86b091e4dbab6a32c820cc2840cbeda35d
+    name: order
+    type: application
+    urls:
+    - https://muhammed-shafeeque-th.github.io/Edulearn-platform/charts/order-1.0.5.tgz
+    version: 1.0.5
+  payment:
+  - apiVersion: v2
+    appVersion: 1.0.5
+    created: "2026-08-05T10:20:14.5420495+05:30"
+    dependencies:
+    - name: edulearn-common
+      repository: file://../../../edulearn-common
+      version: 1.1.1
+    description: Payment service for EduLearn
+    digest: 5a09f1268184d083a7712c0e07d713fb985423ffb9866a42c42b42b4811fa8b6
+    name: payment
+    type: application
+    urls:
+    - https://muhammed-shafeeque-th.github.io/Edulearn-platform/charts/payment-1.0.5.tgz
+    version: 1.0.5
+  postgres:
+  - apiVersion: v2
+    appVersion: 1.0.1
+    created: "2026-08-05T10:20:14.5490855+05:30"
+    dependencies:
+    - name: edulearn-common
+      repository: file://../../edulearn-common
+      version: 1.1.1
+    - alias: postgresql
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 18.7.13
+    description: PostgreSQL using Bitnami chart
+    digest: af1b3ccd34bcf5ca977dc2063cbca4442d674c47d6787b54c7dd995e990d2f7a
+    name: postgres
+    type: application
+    urls:
+    - https://muhammed-shafeeque-th.github.io/Edulearn-platform/charts/postgres-1.0.1.tgz
+    version: 1.0.1
+  redis:
+  - apiVersion: v2
+    appVersion: 1.0.1
+    created: "2026-08-05T10:20:14.5566327+05:30"
+    dependencies:
+    - alias: redis
+      name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: 27.0.15
+    description: Redis wrapper using Bitnami chart
+    digest: 3019e543ef8340a3bd6e838aba928f657a096ace695be317f92c3c0a498eef66
+    name: redis
+    type: application
+    urls:
+    - https://muhammed-shafeeque-th.github.io/Edulearn-platform/charts/redis-1.0.1.tgz
+    version: 1.0.1
+  user:
+  - apiVersion: v2
+    appVersion: 1.0.5
+    created: "2026-08-05T10:20:14.5566327+05:30"
+    dependencies:
+    - name: edulearn-common
+      repository: file://../../../edulearn-common
+      version: 1.1.1
+    description: User service for EduLearn
+    digest: b04da91af65c432f42e8cf3a0739fab8e93a4a7fbb5371d2470b9321a466a5f1
+    name: user
+    type: application
+    urls:
+    - https://muhammed-shafeeque-th.github.io/Edulearn-platform/charts/user-1.0.5.tgz
+    version: 1.0.5
+generated: "2026-08-05T10:20:14.497491+05:30"

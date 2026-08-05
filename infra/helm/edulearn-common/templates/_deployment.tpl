@@ -32,7 +32,7 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
         
       # This causes replicas to be spread across zones.
-      {{- if .Values.topologySpreadConstraints.enabled }}
+    {{- if and .Values.topologySpreadConstraints (.Values.topologySpreadConstraints.enabled) }}
       topologySpreadConstraints:
         - maxSkew: {{ .Values.topologySpreadConstraints.maxSkew | default 1 }}
           topologyKey: topology.kubernetes.io/zone
