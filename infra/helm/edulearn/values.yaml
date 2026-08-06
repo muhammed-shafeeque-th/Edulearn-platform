@@ -1070,6 +1070,7 @@ externalSecret:
 
 configData:
   REDIS_URL: redis://edulearn-app-redis-master:6379
+  REDIS_ADDR: edulearn-app-redis-master:6379
   REDIS_HOST: edulearn-app-redis-master
   REDIS_PORT: "6379"
   REDIS_LAZY_CONNECT: "true"
