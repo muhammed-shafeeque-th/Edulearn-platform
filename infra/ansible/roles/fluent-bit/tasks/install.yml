@@ -18,7 +18,7 @@
 
     wait: true
 
-    wait_timeout: 300s
+    wait_timeout: 600s
 
     atomic: true
 
