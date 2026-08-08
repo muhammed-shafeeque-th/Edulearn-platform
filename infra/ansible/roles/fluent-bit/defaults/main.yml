@@ -18,11 +18,11 @@ otel_collector_otlp_port: 4318
 # Resources
 fluentbit_resources:
   requests:
+    cpu: 25m
+    memory: 64Mi
+  limits:
     cpu: 100m
     memory: 128Mi
-  limits:
-    cpu: 500m
-    memory: 512Mi
 
 # Log Level
 fluentbit_log_level: info

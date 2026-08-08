@@ -7,19 +7,20 @@
       metadata:
         name: "{{ loki_namespace }}"
 
-- name: Add Grafana Helm repository
+- name: Add/update Grafana Helm repository
   kubernetes.core.helm_repository:
     name: grafana
     repo_url: "{{ loki_chart_repo }}"
+    force_update: true
 
-- name: Update Helm repositories
-  ansible.builtin.command:
-    cmd: helm repo update
-  changed_when: false
+# - name: Update Helm repositories
+#   ansible.builtin.command:
+#     cmd: helm repo update
+#   changed_when: false
 
 - name: Render values
   become: true
   template:
     src: values.yaml.j2
     dest: /tmp/loki-values.yaml
-    mode: '0644' 
+    mode: '0644'

@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket = "terraform-s3-backend-edulearn"
+    bucket =  "terraform-s3-backend-edulearn-dev"
     key    = "environments/dev/terraform.tfstate"
     region = "ap-south-1"
     # dynamodb_table = "terraform-state-lock"  # Create this table if it doesn't exist

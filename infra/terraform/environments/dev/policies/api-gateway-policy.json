@@ -9,16 +9,16 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::edulearn-public-assets/*",
-        "arn:aws:s3:::edulearn-private-content/*"
+        "arn:aws:s3:::edulearn-public-resources/*",
+        "arn:aws:s3:::edulearn-private-contents"
       ]
     },
     {
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": [
-        "arn:aws:s3:::edulearn-public-assets",
-        "arn:aws:s3:::edulearn-private-content"
+        "arn:aws:s3:::edulearn-public-resources",
+        "arn:aws:s3:::edulearn-private-contents"
       ]
     }
   ]
