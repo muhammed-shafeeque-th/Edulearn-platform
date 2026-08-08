@@ -8,11 +8,11 @@ singleBinary:
     size: "{{ loki_storage_size }}"
   resources:
     requests:
-      cpu: 200m
-      memory: 512Mi
+      cpu: 100m
+      memory: 256Mi
     limits:
-      cpu: 1
-      memory: 2Gi
+      cpu: 300m
+      memory: 512Mi
 
 # Zero out SimpleScalable components
 read:
@@ -92,6 +92,15 @@ loki:
     runAsUser: 10001
     runAsGroup: 10001
     runAsNonRoot: true
+  
+  nodeSelector:
+      workload: stateful
+
+  tolerations:
+      - key: workload
+        operator: Equal
+        value: stateful
+        effect: NoSchedule
 
 service:
   type: ClusterIP

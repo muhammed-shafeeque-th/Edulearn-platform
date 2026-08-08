@@ -14,7 +14,7 @@ storage_class: gp3
 
 aws_region: ap-south-1
 
-loki_bucket_name: edulearn-loki
+loki_bucket_name: edulearn-loki-bucket
 
 loki_retention: 30d
 
