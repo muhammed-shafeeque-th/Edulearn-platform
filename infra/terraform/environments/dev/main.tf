@@ -121,7 +121,7 @@ module "loki_bucket" {
   source = "../../modules/s3-bucket"
 
   bucket = {
-    name          = "edulearn-loki"
+    name          = "edulearn-loki-bucket"
     force_destroy = true
     tags = {
       Application = "EduLearn"
@@ -139,7 +139,7 @@ module "tempo_bucket" {
 
   source = "../../modules/s3-bucket"
   bucket = {
-    name          = "edulearn-tempo"
+    name          = "edulearn-tempo-bucket"
     force_destroy = true
 
     tags = {
