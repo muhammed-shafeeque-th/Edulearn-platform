@@ -54,7 +54,6 @@ api-gateway:
     maxReplicas: 10
     targetCPUUtilizationPercentage: 80
 
-
   topologySpreadConstraints:
     enabled: true
     maxSkew: 1
@@ -73,6 +72,16 @@ api-gateway:
       port: http
     initialDelaySeconds: 5
     periodSeconds: 5
+
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: workload
+                operator: In
+                values:
+                  - stateless
 
   env:
     NODE_ENV: "production"
@@ -145,6 +154,15 @@ auth:
                 app.kubernetes.io/name: auth
                 app.kubernetes.io/instance: "{{ .Release.Name }}"
             topologyKey: kubernetes.io/hostname
+
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: workload
+                operator: In
+                values:
+                  - stateless
 
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/auth
@@ -316,6 +334,16 @@ user:
         port: 3000
         targetPort: 3000
 
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: workload
+                operator: In
+                values:
+                  - stateless
+
   serviceMonitor:
     enabled: true
     interval: 30s
@@ -435,6 +463,16 @@ course:
       - name: grpc
         port: 50053
         targetPort: 50053
+
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: workload
+                operator: In
+                values:
+                  - stateless
 
   serviceMonitor:
     enabled: true
@@ -560,6 +598,14 @@ payment:
                 app.kubernetes.io/name: payment
                 app.kubernetes.io/instance: "{{ .Release.Name }}"
             topologyKey: kubernetes.io/hostname
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: workload
+                operator: In
+                values:
+                  - stateless
 
   image:
     repository: ghcr.io/muhammed-shafeeque-th/edulearn/payment
@@ -707,6 +753,16 @@ notification:
         port: 4001
         targetPort: 4001
 
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: workload
+                operator: In
+                values:
+                  - stateless
+
   serviceMonitor:
     enabled: true
     interval: 30s
@@ -835,6 +891,16 @@ order:
         port: 50054
         targetPort: 50054
 
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: workload
+                operator: In
+                values:
+                  - stateless
+
   serviceMonitor:
     enabled: true
     interval: 30s
@@ -959,6 +1025,16 @@ chat:
     interval: 30s
     path: /metrics
     port: http
+
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: workload
+                operator: In
+                values:
+                  - stateless
 
   resources:
     requests:
@@ -1110,7 +1186,7 @@ configData:
   KAFKA_PRODUCER_BATCH_SIZE: "16384"
   KAFKA_PRODUCER_LINGER_MS: "5"
 
-  OTLP_ENDPOINT: http://otel-collector.observability.svc.cluster.local:4317
+  OTLP_ENDPOINT: http://otel-collector-opentelemetry-collector.observability.svc.cluster.local:4317
 
   METRICS_PATH: /metrics
 
@@ -1203,6 +1279,8 @@ postgres:
     primary:
       persistence:
         enabled: true
+        storageClass: gp3
+
         size: 2Gi
 
       pdb:
@@ -1216,6 +1294,7 @@ postgres:
         limits:
           cpu: 600m
           memory: 1Gi
+
       nodeSelector:
         workload: stateful
 
@@ -1333,7 +1412,6 @@ kafka:
           cpu: 400m
           memory: 512Mi
 
-
     broker:
       replicaCount: 1
 
@@ -1350,7 +1428,6 @@ kafka:
           operator: Equal
           value: stateful
           effect: NoSchedule
-
 
       pdb:
         create: true
