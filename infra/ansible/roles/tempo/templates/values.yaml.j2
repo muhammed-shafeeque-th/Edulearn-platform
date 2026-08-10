@@ -24,6 +24,15 @@ serviceAccount:
 podSecurityContext:
   fsGroup: 10001
 
+nodeSelector:
+      workload: stateful
+
+tolerations:
+      - key: workload
+        operator: Equal
+        value: stateful
+        effect: NoSchedule
+
 # Container-level security context (spec.template.spec.containers[*].securityContext)
 tempo:
   securityContext:
@@ -53,11 +62,13 @@ tempo:
   tempoConfig:
     metricsGenerator:
       enabled: true
-      remoteWriteUrl: "http://kube-prometheus-stack-prometheus.monitoring.svc:9090/api/v1/write"
+      storage:
+        path: /var/tempo/generator/wal
+        remoteWriteUrl: "http://kube-prometheus-stack-prometheus.monitoring.svc:9090/api/v1/write"
     overrides:
       defaults:
         metricsGenerator:
-          processors: ["service-graphs", "span-metrics"]
+          processors: ["service-graphs", "span-metrics", "local-blocks"]
 
     distributor:
       receivers:
