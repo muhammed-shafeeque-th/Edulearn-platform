@@ -12,7 +12,7 @@ fluentbit_chart_version: "0.50.0"
 fluentbit_service_account: fluent-bit
 
 # Collector
-otel_collector_host: otel-collector.observability.svc.cluster.local
+otel_collector_host: otel-collector-opentelemetry-collector.observability.svc.cluster.local
 otel_collector_otlp_port: 4318
 
 # Resources

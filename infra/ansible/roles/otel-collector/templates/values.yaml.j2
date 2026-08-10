@@ -10,7 +10,7 @@ serviceAccount:
   name: "{{ otel_service_account }}"
 
 clusterRole:
-  create: true
+  create: false
   name: "{{ otel_service_account }}-clusterrole"
 
 podSecurityContext:
@@ -103,7 +103,7 @@ config:
 
   exporters:
     debug:
-      verbosity: basic
+      verbosity: detailed
 
     otlp/tempo:
       endpoint: "{{ tempo_endpoint }}"
@@ -112,6 +112,15 @@ config:
 
     loki:
       endpoint: "{{ loki_endpoint }}"
+      default_labels_enabled:
+        exporter: true
+        job: true
+      loki_attributes:
+        labels:
+          k8s.namespace.name: "namespace"
+          k8s.pod.name: "pod"
+          k8s.container.name: "container"
+          service.name: "service_name"
 
   service:
     telemetry:
@@ -134,16 +143,19 @@ config:
           - resourcedetection
           - batch
         exporters:
+          - debug
           - otlp/tempo
-
+          
       logs:
         receivers:
           - otlp
         processors:
           - memory_limiter
+          - k8sattributes
           - resourcedetection
           - batch
         exporters:
+          - debug
           - loki
 
       metrics:

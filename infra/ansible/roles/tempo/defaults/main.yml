@@ -13,7 +13,7 @@ storage_class: gp3
 
 tempo_storage_size: 20Gi
 
-tempo_bucket_name: edulearn-tempo
+tempo_bucket_name: edulearn-tempo-bucket
 
 tempo_retention: 720h
 

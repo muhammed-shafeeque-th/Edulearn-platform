@@ -71,8 +71,7 @@ config:
         Kube_URL            https://kubernetes.default.svc:443
         Kube_CA_File        /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
         Kube_Token_File     /var/run/secrets/kubernetes.io/serviceaccount/token
-        Use_Kubelet         On
-        Kubelet_Port        10250
+        Use_Kubelet         Off
         Merge_Log           On
         Keep_Log            Off
         K8S-Logging.Parser  On
@@ -81,7 +80,7 @@ config:
     [FILTER]
         Name                  grep
         Match                 kube.*
-        Regex                 $kubernetes['namespace_name'] ^(edulearn|observability)$
+        Regex                 $kubernetes['namespace_name'] ^(edulearn-app|observability)$
 
   config:
   outputs: |

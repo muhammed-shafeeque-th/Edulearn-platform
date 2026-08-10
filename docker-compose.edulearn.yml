@@ -376,7 +376,7 @@ services:
     # build:
     #   context: ./auth
     #   dockerfile: Dockerfile
-    image: edulearn-auth:v1
+    image: edulearn-auth:v1.1.10
     container_name: auth_svc
     depends_on:
       kafka:
@@ -385,20 +385,13 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
-    # environment:
-    #   POSTGRES_HOST: postgres
-    #   POSTGRES_PORT: "5432"
-    #   REDIS_URL: redis://redis:6379/0
-    #   KAFKA_BROKERS: kafka:29092
-    #   JAEGER_ENDPOINT: http://jaeger:14268/api/traces
-    #   LOKI_URL: http://loki:3100
     env_file:
-      - ./auth/.env.production
+      - ./auth/.env.development
     networks:
       - observability
     ports:
       - "50051:50051"
-      - "3001:3001"
+      - "3001:3000"
     restart: unless-stopped
 
   notification_svc:
@@ -406,7 +399,7 @@ services:
     # build:
     #   context: ./notification
     #   dockerfile: Dockerfile
-    image: edulearn-notification:v1
+    image: edulearn-notification:v1.1.10
     container_name: notification_svc
     depends_on:
       kafka:
@@ -415,19 +408,12 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
-    # environment:
-      # DATABASE_DSNs: postgresql://postgres:password@postgres:5432/notification_service?sslmode=disable
-      # REDIS_ADDR: redis:6379
-      # KAFKA_BROKERS: kafka:29092
-      # JAEGER_HOST: jaeger
-      # JAEGER_ENDPOINT: http://jaeger:14268/api/traces
-      # LOKI_URL: http://loki:3100
     env_file:
-      - ./notification/.env
+      - ./notification/.env.development
     networks:
       - observability
     ports:
-      - "4001:4001"
+      - "3006:3000"
       - "50056:50056"
     restart: unless-stopped
 
@@ -436,7 +422,7 @@ services:
     # build:
     #   context: ./user
     #   dockerfile: Dockerfile
-    image: edulearn-user:v1
+    image: edulearn-user:v1.1.10
     container_name: user_svc
     depends_on:
       kafka:
@@ -445,19 +431,13 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
-    # environment:
-    #   POSTGRES_HOST: postgres
-    #   POSTGRES_PORT: "5432"
-    #   REDIS_URL: redis://redis:6379/0
-    #   KAFKA_BROKERS: kafka:29092
-    #   JAEGER_ENDPOINT: http://jaeger:14268/api/traces
-    #   LOKI_URL: http://loki:3100
     env_file:
-      - ./user/.env.production
+      - ./user/.env.development
     networks:
       - observability
     ports:
     - "50052:50052"
+    - "3002:3000"
     restart: unless-stopped
 
   course_svc:
@@ -465,7 +445,7 @@ services:
     # build:
     #   context: ./course
     #   dockerfile: Dockerfile
-    image: edulearn-course:v1
+    image: edulearn-course:v1.1.10
     container_name: course_svc
     depends_on:
       kafka:
@@ -474,17 +454,12 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
-    # environment:
-    #   POSTGRES_HOST: postgres
-    #   POSTGRES_PORT: "5432"
-    #   REDIS_URL: redis://redis:6379/0
-    #   KAFKA_BROKERS: kafka:29092
-    #   JAEGER_ENDPOINT: http://jaeger:14268/api/traces
-    #   LOKI_URL: http://loki:3100
     env_file:
-      - ./course/.env.production
+      - ./course/.env.development
     ports:
     - "50053:50053"
+    - "3003:3000"
+
     networks:
       - observability
     restart: unless-stopped
@@ -494,7 +469,7 @@ services:
     # build:
     #   context: ./payment
     #   dockerfile: Dockerfile
-    image: edulearn-payment:v1
+    image: edulearn-payment:v1.1.10
     container_name: payment_svc
     depends_on:
       kafka:
@@ -503,27 +478,20 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
-    # environment:
-    #   POSTGRES_HOST: postgres
-    #   POSTGRES_PORT: "5432"
-    #   REDIS_URL: redis://redis:6379/0
-    #   KAFKA_BROKERS: kafka:29092
-    #   JAEGER_ENDPOINT: http://jaeger:14268/api/traces
-    #   LOKI_URL: http://loki:3100
     env_file:
-      - ./payment/.env
+      - ./payment/.env.development
     networks:
       - observability
     ports:
     - "50055:50055"
-    - "4005:4005"
+    - "3005:3000"
     restart: unless-stopped
   chat_svc:
     profiles: ["chat", "domains"]
     # build:
     #   context: ./chat
     #   dockerfile: Dockerfile
-    image: edulearn-chat:v1
+    image: edulearn-chat:v1.1.10
     container_name: chat_svc
     depends_on:
       kafka:
@@ -532,20 +500,13 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
-    # environment:
-    #   POSTGRES_HOST: postgres
-    #   POSTGRES_PORT: "5432"
-    #   REDIS_URL: redis://redis:6379/0
-    #   KAFKA_BROKERS: kafka:29092
-    #   JAEGER_ENDPOINT: http://jaeger:14268/api/traces
-    #   LOKI_URL: http://loki:3100
     env_file:
-      - ./chat/.env.production
+      - ./chat/.env.development
     networks:
       - observability
     ports:
     - "50059:50059"
-    - "4009:4009"
+    - "3009:3000"
     restart: unless-stopped
 
   order_svc:
@@ -553,7 +514,7 @@ services:
     # build:
     #   context: ./order
     #   dockerfile: Dockerfile
-    image: edulearn-order:v1
+    image: edulearn-order:v1.1.10
     container_name: order_svc
     depends_on:
       kafka:
@@ -564,13 +525,13 @@ services:
         condition: service_healthy
     # environment:
     #   KAFKA_BROKERS: kafka:29092
-    #   JAEGER_ENDPOINT: http://jaeger:14268/api/traces
     networks:
       - observability
     env_file:
-      - ./order/.env
+      - ./order/.env.development
     ports:
     - "50054:50054"
+    - "3004:3000"
     restart: unless-stopped
 
   api_gateway:
@@ -578,7 +539,7 @@ services:
     # build:
     #   context: ./api-gateway
     #   dockerfile: Dockerfile
-    image: edulearn-gateway:v1
+    image: edulearn-gateway:v1.1.10
     container_name: api_gateway
     depends_on:
       redis:
@@ -588,14 +549,13 @@ services:
       # jaeger:
       #   condition: service_healthy
     # environment:
-    #   JAEGER_ENDPOINT: http://jaeger:14268/api/traces
-    #   LOKI_URL: http://loki:3100
     networks:
       - observability
     env_file:
-      - ./api-gateway/.env.production
+      - ./api-gateway/.env.development
     ports:
       - "4000:4000"
+      - "3000:3000"
     restart: unless-stopped
 # =============================================================================
 # NETWORKS
