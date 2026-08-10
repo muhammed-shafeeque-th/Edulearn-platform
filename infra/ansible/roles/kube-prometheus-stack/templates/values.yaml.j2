@@ -43,6 +43,15 @@ prometheus:
 
     scrapeInterval: 30s
     evaluationInterval: 30s
+    
+    nodeSelector:
+      workload: stateful
+
+    tolerations:
+      - key: workload
+        operator: Equal
+        value: stateful
+        effect: NoSchedule
 
     walCompression: true
 
