@@ -2,6 +2,9 @@
 - name: Install prerequisites
   ansible.builtin.import_tasks: prerequisites.yml
 
+- name: Crate cluster role and bind it to otel-sa
+  ansible.builtin.import_tasks: rbac.yml
+
 - name: Install OpenTelemetry Collector
   ansible.builtin.import_tasks: install.yml
 
