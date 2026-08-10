@@ -6,11 +6,11 @@ aws_account_id: "353452028891"
 
 base_domain: muhammedshafeeque.online
 
-bastion_public_ip: 3.111.216.97
+bastion_public_ip: 13.233.50.140
 
 aws_lbc_version: "3.0.0"
 
-certificate_arn: arn:aws:acm:ap-south-1:353452028891:certificate/87663d39-8905-4f21-aa34-2fd1f72171a1
+certificate_arn: arn:aws:acm:ap-south-1:467008424241:certificate/4172a940-f65e-4496-bcb3-b85b16e3efea
 
 gateway_hostname: "*.muhammedshafeeque.online"
 
@@ -51,10 +51,10 @@ argocd_images:
 - alias: chat
   repository: ghcr.io/muhammed-shafeeque-th/edulearn/chat
 
-eks_cluster_endpoint: https://9FE9FD33CE939A9656C048DC8B4056F0.gr7.ap-south-1.eks.amazonaws.com
-vpc_id: vpc-05aa149d97037e269
-loki_bucket: edulearn-loki
-tempo_bucket: edulearn-tempo
+eks_cluster_endpoint: https://444DC081388761A25E1C81B2D8A8AA1A.gr7.ap-south-1.eks.amazonaws.com
+vpc_id: vpc-052b61aa181c6fb1f
+loki_bucket: edulearn-loki-bucket
+tempo_bucket: edulearn-tempo-bucket
 
 alertmanager_secret_name: alertmanager-config
 
