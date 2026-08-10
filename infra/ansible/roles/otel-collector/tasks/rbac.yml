@@ -1,0 +1,46 @@
+- name: Create OTEL Collector ClusterRole
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRole
+      metadata:
+        name: "{{ otel_service_account }}-clusterrole"
+      rules:
+        - apiGroups: [""]
+          resources:
+            - pods
+            - namespaces
+            - nodes
+          verbs:
+            - get
+            - list
+            - watch
+
+        - apiGroups: ["apps"]
+          resources:
+            - replicasets
+            - deployments
+            - daemonsets
+            - statefulsets
+          verbs:
+            - get
+            - list
+            - watch
+
+- name: Create OTEL Collector ClusterRoleBinding
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRoleBinding
+      metadata:
+        name: "{{ otel_service_account }}-clusterrolebinding"
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: "{{ otel_service_account }}-clusterrole"
+      subjects:
+        - kind: ServiceAccount
+          name: "{{ otel_service_account }}"
+          namespace: "{{ otel_namespace }}"
