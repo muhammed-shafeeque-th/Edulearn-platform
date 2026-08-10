@@ -1186,8 +1186,8 @@ configData:
   KAFKA_PRODUCER_BATCH_SIZE: "16384"
   KAFKA_PRODUCER_LINGER_MS: "5"
 
-  OTLP_ENDPOINT: http://otel-collector-opentelemetry-collector.observability.svc.cluster.local:4317
-
+  OTLP_ENDPOINT: http://otel-collector-opentelemetry-collector.observability.svc.cluster.local:4318
+  OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
   METRICS_PATH: /metrics
 
 secretData: {}
@@ -1259,7 +1259,7 @@ redis:
 postgres:
   enabled: true
 
-  postgres:
+  postgresql:
     auth:
       existingSecret: postgres-secret
 
@@ -1297,6 +1297,8 @@ postgres:
 
       nodeSelector:
         workload: stateful
+        topology: ap-south-1a
+
 
       tolerations:
         - key: workload
