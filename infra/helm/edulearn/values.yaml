@@ -1105,7 +1105,7 @@ chat:
     REDIS_TTL_DEFAULT: "86400"
     REDIS_KEY_PREFIX: "edulearn:chat:"
 
-    ALLOWED_ORIGINS: https://web-edulearn.vercel.app,*
+    ALLOWED_ORIGINS: '*'
 
     GRPC_PORT: "50059"
     GRPC_MAX_CONCURRENT_STREAMS: "100"
@@ -1164,7 +1164,7 @@ configData:
   CHAT_SERVICE_GRPC: edulearn-chat:50059
 
   # CORS CONFIGURATION
-  ALLOWED_ORIGINS: https://web-edulearn.vercel.app,*
+  ALLOWED_ORIGINS: '*'
   ALLOWED_METHODS: GET,POST,PUT,DELETE,PATCH,OPTIONS
 
   GRPC_TIMEOUT: "30000"
