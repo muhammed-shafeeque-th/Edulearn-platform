@@ -19,7 +19,7 @@ dependencies:
   version: 1.0.5
 - name: order
   repository: file://../charts/order
-  version: 1.0.5
+  version: 1.0.6
 - name: notification
   repository: file://../charts/notification
   version: 1.0.5
@@ -35,5 +35,5 @@ dependencies:
 - name: postgres
   repository: file://../charts/postgres
   version: 1.0.1
-digest: sha256:58a4c637b3faff009016958c87c7daa1543005b5e97149973282dcaacbf01b41
-generated: "2026-08-03T17:31:48.0630176+05:30"
+digest: sha256:1880f0a75704be6f7a82271893cbff0bc649dc27dab28d5d16491c40810a57e1
+generated: "2026-08-13T11:33:57.1361628+05:30"

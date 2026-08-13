@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: order-db-migrate
+  namespace: edulearn-app
+  labels:
+    app.kubernetes.io/name: order
+    app.kubernetes.io/component: migration
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: order
+        app.kubernetes.io/component: migration
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              echo "Running Alembic migrations..."
+              alembic upgrade head
+              echo "Migration completed successfully."
+          envFrom:
+
+            # global secrets
+            {{- range .Values.global.secretRefs }}
+            - secretRef:
+                name: {{ . }}
+            {{- end }}
+
+            # service secrets
+            {{- range .Values.secretRefs }}
+            - secretRef:
+                name: {{ . }}
+            {{- end }}
+
+            # global configs
+            {{- range .Values.global.configMaps }}
+            - configMapRef:
+                name: {{ . }}
+            {{- end }}
+            {{- range .Values.configMaps }}
+            - configMapRef:
+                name: {{ . }}
+            {{- end }}
