@@ -283,13 +283,13 @@ auth:
     COMPANY_NAME: EduLearn
     COMPANY_ADDRESS: EduLearn Inc., 456 Learning Avenue, San Francisco, CA 94102
     SUPPORT_EMAIL: support@edulearn.com
-    BASE_URL: https://edulearn.com
+    BASE_URL: https://web-edulearn.vercel.app
 
-    TWITTER_URL: https://twitter.com/edulearn
-    FACEBOOK_URL: https://facebook.com/edulearn
-    LINKEDIN_URL: https://linkedin.com/company/edulearn
-    INSTAGRAM_URL: https://instagram.com/edulearn
-    YOUTUBE_URL: https://youtube.com/@edulearn
+    TWITTER_URL: https://twitter.com/web_edulearn
+    FACEBOOK_URL: https://facebook.com/web_edulearn
+    LINKEDIN_URL: https://linkedin.com/company/web_edulearn
+    INSTAGRAM_URL: https://instagram.com/web_edulearn
+    YOUTUBE_URL: https://youtube.com/@web_edulearn
 
     REDIS_DB: "1"
     REDIS_MAX_CONNECTIONS: "100"
