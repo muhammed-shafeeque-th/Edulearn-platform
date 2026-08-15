@@ -283,7 +283,7 @@ auth:
     COMPANY_NAME: EduLearn
     COMPANY_ADDRESS: EduLearn Inc., 456 Learning Avenue, San Francisco, CA 94102
     SUPPORT_EMAIL: support@edulearn.com
-    BASE_URL: https://web-edulearn.vercel.app
+    BASE_URL: https://edulearn.muhammedshafeeque.online
 
     TWITTER_URL: https://twitter.com/web_edulearn
     FACEBOOK_URL: https://facebook.com/web_edulearn
@@ -1105,7 +1105,7 @@ chat:
     REDIS_TTL_DEFAULT: "86400"
     REDIS_KEY_PREFIX: "edulearn:chat:"
 
-    ALLOWED_ORIGINS: https://web-edulearn.vercel.app,http://localhost:9000
+    ALLOWED_ORIGINS: https://edulearn.muhammedshafeeque.online,http://localhost:9000
 
     GRPC_PORT: "50059"
     GRPC_MAX_CONCURRENT_STREAMS: "100"
@@ -1164,7 +1164,7 @@ configData:
   CHAT_SERVICE_GRPC: edulearn-chat:50059
 
   # CORS CONFIGURATION
-  ALLOWED_ORIGINS: https://web-edulearn.vercel.app,http://localhost:9000
+  ALLOWED_ORIGINS: https://edulearn.muhammedshafeeque.online,http://localhost:9000
   ALLOWED_METHODS: GET,POST,PUT,DELETE,PATCH,OPTIONS
 
   GRPC_TIMEOUT: "30000"
