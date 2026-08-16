@@ -11,7 +11,7 @@ The platform is designed using **microservices architecture**, **Clean Architect
 
 ## Architecture
 
-![Edulearn Deployment Architecture](docs/images/edulearn-arch-dark.png)
+![Edulearn Architecture](docs/images/app-arch.png)
 
 The platform is composed of independently deployable services that communicate internally using **gRPC** and **Kafka**, while external traffic enters through **AWS Gateway API + Application Load Balancer**.
 
@@ -534,6 +534,11 @@ This provides path-based and host-based routing with native AWS integration.
 # Observability
 
 Edulearn uses the **LGTM stack**.
+
+
+### Observability Architecture
+
+![Edulearn Observability Architecture](docs/images/observability-arch.png)
 
 ## Metrics
 
