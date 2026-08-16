@@ -1107,6 +1107,8 @@ chat:
 
     ALLOWED_ORIGINS: https://edulearn.muhammedshafeeque.online,http://localhost:9000
 
+    APP_PUBLIC_ASSETS_URL: https://assets.muhammedshafeeque.online
+
     GRPC_PORT: "50059"
     GRPC_MAX_CONCURRENT_STREAMS: "100"
     GRPC_MAX_CONNECTION_IDLE: 15s
@@ -1163,6 +1165,9 @@ configData:
   ORDER_SERVICE_GRPC: edulearn-order:50054
   CHAT_SERVICE_GRPC: edulearn-chat:50059
 
+  APP_ASSETS_URL: https://assets.muhammedshafeeque.online
+  SITE_URL: https://edulearn.muhammedshafeeque.online
+  
   # CORS CONFIGURATION
   ALLOWED_ORIGINS: https://edulearn.muhammedshafeeque.online,http://localhost:9000
   ALLOWED_METHODS: GET,POST,PUT,DELETE,PATCH,OPTIONS
@@ -1298,7 +1303,6 @@ postgres:
       nodeSelector:
         workload: stateful
         topology: ap-south-1a
-
 
       tolerations:
         - key: workload
@@ -1445,7 +1449,7 @@ kafka:
         limits:
           cpu: 600m
           memory: 768Mi
-          
+
       overrideConfiguration:
         offsets.topic.replication.factor: 1
         transaction.state.log.replication.factor: 1
