@@ -1167,6 +1167,7 @@ configData:
 
   APP_ASSETS_URL: https://assets.muhammedshafeeque.online
   SITE_URL: https://edulearn.muhammedshafeeque.online
+  APP_BASE_DOMAIN: .muhammedshafeeque.online
   
   # CORS CONFIGURATION
   ALLOWED_ORIGINS: https://edulearn.muhammedshafeeque.online,http://localhost:9000
