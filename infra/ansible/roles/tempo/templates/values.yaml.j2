@@ -21,8 +21,11 @@ serviceAccount:
   name: tempo
 
 # Pod-level security context (spec.template.spec.securityContext)
-podSecurityContext:
+securityContext:
   fsGroup: 10001
+  runAsUser: 10001
+  runAsGroup: 10001
+  runAsNonRoot: true
 
 nodeSelector:
       workload: stateful
@@ -33,24 +36,24 @@ tolerations:
         value: stateful
         effect: NoSchedule
 
+
+
+compactor:
+  compaction:
+    block_retention: "{{ tempo_retention }}"
+  working_directory: /var/tempo/compactor
+
+
+
 # Container-level security context (spec.template.spec.containers[*].securityContext)
 tempo:
   securityContext:
-    runAsUser: 10001
-    runAsGroup: 10001
-    runAsNonRoot: true
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-        - ALL
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
 
   retention: "{{ tempo_retention }}"
-
-  compactor:
-    compaction:
-      block_retention: "{{ tempo_retention }}"
-    working_directory: /var/tempo/compactor
-
   storage:
     trace:
       backend: s3
@@ -59,34 +62,36 @@ tempo:
         endpoint: "s3.{{ aws_region }}.amazonaws.com"
         region: "{{ aws_region }}"
 
-  tempoConfig:
-    metricsGenerator:
-      enabled: true
-      storage:
-        path: /var/tempo/generator/wal
-        remoteWriteUrl: "http://kube-prometheus-stack-prometheus.monitoring.svc:9090/api/v1/write"
-    overrides:
-      defaults:
-        metricsGenerator:
-          processors: ["service-graphs", "span-metrics", "local-blocks"]
 
-    distributor:
-      receivers:
-        otlp:
-          protocols:
-            grpc:
-            http:
-        jaeger:
-          protocols:
-            grpc:
-            thrift_binary:
-            thrift_http:
-        zipkin:
+  metricsGenerator:
+    enabled: true
+    storage:
+      path: /var/tempo/generator/wal
+    remoteWriteUrl: "http://kube-prometheus-stack-prometheus.monitoring.svc:9090/api/v1/write"
 
-resources:
-  requests:
-    cpu: 200m
-    memory: 512Mi
-  limits:
-    cpu: 1
-    memory: 2Gi
+  overrides:
+    defaults:
+      metrics_generator:
+        processors: ["service-graphs", "span-metrics", "local-blocks"]
+
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+    jaeger:
+      protocols:
+        thrift_compact:
+          endpoint: 0.0.0.0:6831
+    zipkin:
+      endpoint: 0.0.0.0:9411
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1
+      memory: 2Gi

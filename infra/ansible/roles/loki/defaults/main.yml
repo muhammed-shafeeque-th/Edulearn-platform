@@ -20,4 +20,4 @@ loki_retention: 30d
 
 loki_replicas: 1
 
-loki_storage_size: 2Gi
+loki_storage_size: 20Gi
