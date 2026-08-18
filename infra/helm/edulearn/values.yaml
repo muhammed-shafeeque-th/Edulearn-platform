@@ -114,7 +114,7 @@ api-gateway:
     METRICS_ENABLED: "true"
 
     # Logging Configuration
-    LOG_LEVEL: info
+    LOG_LEVEL: debug
     LOG_FORMAT: json
 
     TRACING_SAMPLING_RATE: "0.1"
@@ -726,7 +726,7 @@ payment:
     GRPC_TIME: 2h
     GRPC_TIMEOUT: 20s
 
-    LOG_LEVEL: info
+    LOG_LEVEL: debug
 
     TRACING_ENABLED: "true"
     TRACING_SAMPLING_RATE: "0.1"
@@ -998,7 +998,7 @@ order:
     GRPC_TIME: 2h
     GRPC_TIMEOUT: 20s
 
-    LOG_LEVEL: info
+    LOG_LEVEL: debug
 
     TRACING_ENABLED: "true"
     TRACING_SERVICE_NAME: order-service
@@ -1132,7 +1132,7 @@ chat:
     METRICS_PATH: /metrics
     METRICS_ENABLED: "true"
 
-    LOG_LEVEL: info
+    LOG_LEVEL: debug
     LOG_FORMAT: json
 
     TRACING_ENABLED: "true"
