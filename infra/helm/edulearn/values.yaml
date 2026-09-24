@@ -120,10 +120,10 @@ api-gateway:
     TRACING_SAMPLING_RATE: "0.1"
     TRACING_SERVICE_NAME: gateway-service
 
-    AWS_S3_BUCKET_NAME: edulearn-assets
+    AWS_S3_BUCKET_NAME: edulearn-public-contents
     AWS_S3_REGION: ap-south-1
 
-    AWS_S3_SECURE_BUCKET_NAME: edulearn-private-media
+    AWS_S3_SECURE_BUCKET_NAME: edulearn-course-contents
     AWS_S3_SECURE_REGION: ap-south-1
 
   secretData: {}
